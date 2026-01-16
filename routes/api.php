@@ -24,6 +24,7 @@ Route::prefix('v1')
     ->group(function () {
         Route::middleware(['auth:sanctum'])->group(function () {
             include 'v1/api/user.php';
+            include 'v1/api/role.php';
         });
         include 'v1/api/auth.php';
     });

@@ -10,7 +10,15 @@ use App\Traits\ApiResponses;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
+use App\Acl\Acl;
 
+/**
+ * @tags Authentication
+ */
 class AuthController extends Controller
 {
     use AuthenticatesUsers, ApiResponses;
@@ -38,7 +46,7 @@ class AuthController extends Controller
             $token = $user->createToken('API Token')->plainTextToken;
 
             return response()->json([
-                'message' => __('Đăng nhập thành công'),
+                'message' => __('Login successful!'),
                 'data' => [
                     'token' => $token,
                     'user' => new UserResource($user),
@@ -47,8 +55,16 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'message' => __('Email hoặc mật khẩu không đúng'),
+            'message' => __('Email or password is incorrect'),
         ], JsonResponse::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * Use the session (web) guard for attempts so the AuthenticatesUsers trait can call ->attempt().
+     */
+    protected function guard()
+    {
+        return Auth::guard('web');
     }
 
     /**
@@ -69,7 +85,7 @@ class AuthController extends Controller
         $user->currentAccessToken()->delete();
 
         return response()->json([
-            'message' => __('Đăng xuất thành công')
+            'message' => __('Logout successful!')
         ], JsonResponse::HTTP_OK);
     }
 }

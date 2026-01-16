@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enum\GenderEnum;
+use App\Enum\UserStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -35,6 +36,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         'created_at',
         'updated_at',
         'deleted_at',
+        'status',
     ];
 
     /**
@@ -59,6 +61,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
             'password' => 'hashed',
             'birth_date' => 'date',
             'gender' => GenderEnum::class,
+            'status' => UserStatus::class,
         ];
     }
 }
