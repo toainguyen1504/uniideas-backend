@@ -2,15 +2,21 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enum\GenderEnum;
+use App\Enum\UserStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasMedia, MustVerifyEmail
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, InteractsWithMedia;
 
     /**
      * The attributes that are mass assignable.
@@ -19,8 +25,18 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
+        'phone_number',
         'email',
+        'birth_date',
+        'gender',
         'password',
+        'email_verified_at',
+        'created_at',
+        'updated_at',
+        'deleted_at',
+        'status',
     ];
 
     /**
@@ -43,6 +59,9 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'birth_date' => 'date',
+            'gender' => GenderEnum::class,
+            'status' => UserStatus::class,
         ];
     }
 }
