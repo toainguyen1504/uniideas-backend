@@ -16,37 +16,39 @@ class RolePermissionSeeder extends Seeder
     public function run(): void
     {
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
-        $guard = config('auth.defaults.guard', 'api');
 
         foreach (Acl::roles() as $role) {
-            Role::findOrCreate($role, $guard);
+            Role::findOrCreate($role, 'web');
         }
+
+        $createdPermissions = [];
 
         foreach (Acl::permissions() as $permission) {
-            Permission::findOrCreate($permission, $guard);
+            $perm = Permission::findOrCreate($permission, 'web');
+            $createdPermissions[$permission] = $perm;
         }
 
-        $adminRole = Role::findByName(Acl::ROLE_ADMIN, $guard);
-        $qaManagerRole = Role::findByName(Acl::ROLE_QA_MANAGER, $guard);
-        $qaCoordinatorRole = Role::findByName(Acl::ROLE_QA_COORDINATOR, $guard);
-        $staffRole = Role::findByName(Acl::ROLE_STAFF, $guard);
+        $adminRole = Role::findByName(Acl::ROLE_ADMIN);
+        $qaManagerRole = Role::findByName(Acl::ROLE_QA_MANAGER);
+        $qaCoordinatorRole = Role::findByName(Acl::ROLE_QA_COORDINATOR);
+        $staffRole = Role::findByName(Acl::ROLE_STAFF);
 
         $adminRole->givePermissionTo([
-            Acl::PERMISSION_VIEW_ADMIN_MENU_DASHBOARD,
-            Acl::PERMISSION_USER_LIST,
-            Acl::PERMISSION_USER_ADD,
-            Acl::PERMISSION_USER_EDIT,
-            Acl::PERMISSION_USER_DELETE,
-            Acl::PERMISSION_ROLE_MANAGE,
+            $createdPermissions[Acl::PERMISSION_VIEW_ADMIN_MENU_DASHBOARD],
+            $createdPermissions[Acl::PERMISSION_USER_LIST],
+            $createdPermissions[Acl::PERMISSION_USER_ADD],
+            $createdPermissions[Acl::PERMISSION_USER_EDIT],
+            $createdPermissions[Acl::PERMISSION_USER_DELETE],
+            $createdPermissions[Acl::PERMISSION_ROLE_MANAGE],
         ]);
         $qaManagerRole->givePermissionTo([
-            Acl::PERMISSION_VIEW_QA_MANAGER_MENU_DASHBOARD,
+            $createdPermissions[Acl::PERMISSION_VIEW_QA_MANAGER_MENU_DASHBOARD],
         ]);
         $qaCoordinatorRole->givePermissionTo([
-            Acl::PERMISSION_VIEW_QA_COORDINATOR_MENU_DASHBOARD,
+            $createdPermissions[Acl::PERMISSION_VIEW_QA_COORDINATOR_MENU_DASHBOARD],
         ]);
         $staffRole->givePermissionTo([
-            Acl::PERMISSION_VIEW_MENU_DASHBOARD,
+            $createdPermissions[Acl::PERMISSION_VIEW_MENU_DASHBOARD],
         ]);
     }
 }

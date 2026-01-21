@@ -38,6 +38,7 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         'updated_at',
         'deleted_at',
         'status',
+        'department_id',
     ];
 
     /**

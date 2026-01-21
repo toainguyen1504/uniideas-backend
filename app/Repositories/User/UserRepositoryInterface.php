@@ -13,5 +13,5 @@ interface UserRepositoryInterface extends RepositoryInterface
     /**
      * @inheritdoc
      */
-    public function serverPaginationFiltering($searchParams, $isAdmin = true): LengthAwarePaginator;
+    public function serverPaginationFiltering($searchParams): LengthAwarePaginator;
 }

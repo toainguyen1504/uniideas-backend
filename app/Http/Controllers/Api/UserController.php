@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
 use App\Acl\Acl;
+use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\Api\UserResource;
+use App\Models\User;
 use App\Repositories\User\UserRepositoryInterface;
 
 /**
@@ -20,8 +23,8 @@ class UserController extends Controller
         protected UserRepositoryInterface $userRepository,
     ) {
         $this->middleware('permission:'.Acl::PERMISSION_USER_LIST)->only('index');
-        $this->middleware('permission:'.Acl::PERMISSION_USER_ADD)->only(['create', 'store']);
-        $this->middleware('permission:'.Acl::PERMISSION_USER_EDIT)->only(['edit', 'update']);
+        $this->middleware('permission:'.Acl::PERMISSION_USER_ADD)->only(['store']);
+        $this->middleware('permission:'.Acl::PERMISSION_USER_EDIT)->only(['update']);
         $this->middleware('permission:'.Acl::PERMISSION_USER_DELETE)->only('destroy');
     }
 
@@ -45,7 +48,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $users = $this->userRepository->serverPaginationFiltering($request->all(), auth()->user()->isAdmin());
+        $users = $this->userRepository->serverPaginationFiltering($request->all());
 
         if(!$users) {
             return $this->errorResponse([], 
@@ -59,52 +62,80 @@ class UserController extends Controller
     }
 
     /**
-     * Get Create User Form
+     * Create User
      * 
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
+     * 
+     * @authenticated
+     * 
+     * @response array{
+     *   message: string,
+     *   data: \App\Http\Resources\Api\UserResource,
+     * }
+     * 
+     * 
+     * @param App\Http\Requests\User\StoreUserRequest  $request
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        //
+        $user = $this->userRepository->create($request->validated());
+        
+        return $user
+            ? $this->okResponse(new UserResource($user), 'User created successfully.')
+            : $this->errorResponse([], 'Failed to create user.', 422);
     }
 
     /**
+     * Show User Detail
+     * 
      * Display the specified resource.
+     * 
+     * @authenticated
+     * 
+     * @response array{
+     *   message: string,
+     *   data: \App\Http\Resources\Api\UserResource,
+     * }
      */
-    public function show(string $id)
+    public function show(User $user)
     {
-        //
+        return $this->okResponse(new UserResource($user), 'User details retrieved successfully.');
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
+     * Edit User
+     * 
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        //
+        $user = $this->userRepository->update($user, $request->validated());
+        
+        return $user
+            ? $this->okResponse(new UserResource($user), 'User updated successfully.')
+            : $this->errorResponse([], 'Failed to update user.', 422);
     }
 
     /**
+     * Delete User
+     * 
      * Remove the specified resource from storage.
+     * 
+     * @authenticated
+     * 
+     * @response array{
+     *   message: string,
+     *   data: array{},
+     * }
+     * 
+     * @param  \App\Models\User  $user
      */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
-        //
+        $deleted = $this->userRepository->destroy($user);
+
+        return $deleted
+            ? $this->okResponse([], 'User deleted successfully.')
+            : $this->errorResponse([], 'Failed to delete user.', 422);
     }
 }

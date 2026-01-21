@@ -31,11 +31,11 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     /**
      * @inheritdoc
      */
-    public function serverPaginationFiltering($searchParams, $isAdmin = true): LengthAwarePaginator
+    public function serverPaginationFiltering($searchParams): LengthAwarePaginator
     {
         $limit = Arr::get($searchParams, 'limit', self::ITEM_PER_PAGE);
 
-        $query = $this->userFilter($searchParams, $isAdmin);
+        $query = $this->userFilter($searchParams);
 
         $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
 
@@ -45,16 +45,12 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     /**
      * @inheritdoc
      */
-    private function userFilter(array $searchParams, $isAdmin = true)
+    private function userFilter(array $searchParams)
     {
         $keyword = Arr::get($searchParams, 'search', '');
         $status = Arr::get($searchParams, 'status', null);
 
         $query = $this->model->query()->with('roles');
-
-        if ($isAdmin) {
-            $query->where('user_id', auth()->id());
-        }
 
         if ($keyword) {
             if (is_array($keyword)) {
