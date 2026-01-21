@@ -48,25 +48,20 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     private function userFilter(array $searchParams)
     {
         $keyword = Arr::get($searchParams, 'search', '');
-        $role = Arr::get($searchParams, 'role', '');
         $status = Arr::get($searchParams, 'status', null);
 
         $query = $this->model->query()->with('roles');
-
-        if ($role) {
-            $query->role($role);
-        }
 
         if ($keyword) {
             if (is_array($keyword)) {
                 $keyword = $keyword['value'];
             }
-            $query->whereAny([
-                'name',
-                'email',
-                'phone_number',
-                'id',
-            ], 'LIKE', '%' . $keyword . '%');
+            $query->where(function ($q) use ($keyword) {
+                $q->where('id', 'like', '%' . $keyword . '%')
+                    ->orWhereHas('user', function ($q) use ($keyword) {
+                        $q->where('name', 'like', '%' . $keyword . '%');
+                    });
+            });
         }
 
         if (! is_null($status)) {

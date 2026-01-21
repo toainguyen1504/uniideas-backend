@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Acl\Acl;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\RoleResource;
 use App\Repositories\Role\RoleRepositoryInterface;
@@ -18,7 +19,7 @@ class RoleController extends Controller
     public function __construct(
         protected RoleRepositoryInterface $roleRepository,
     ) {
-        //
+        $this->middleware('permission:'.Acl::PERMISSION_ROLE_MANAGE)->only('index');
     }
     /**
      * Get role list
