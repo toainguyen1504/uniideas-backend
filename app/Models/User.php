@@ -13,6 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Acl\Acl;
 
 class User extends Authenticatable implements HasMedia, MustVerifyEmail
 {
@@ -63,5 +64,10 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
             'gender' => GenderEnum::class,
             'status' => UserStatus::class,
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->hasRole(Acl::ROLE_ADMIN);
     }
 }

@@ -31,11 +31,11 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     /**
      * @inheritdoc
      */
-    public function serverPaginationFiltering($searchParams): LengthAwarePaginator
+    public function serverPaginationFiltering($searchParams, $isAdmin = true): LengthAwarePaginator
     {
         $limit = Arr::get($searchParams, 'limit', self::ITEM_PER_PAGE);
 
-        $query = $this->userFilter($searchParams);
+        $query = $this->userFilter($searchParams, $isAdmin);
 
         $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
 
@@ -45,28 +45,27 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     /**
      * @inheritdoc
      */
-    private function userFilter(array $searchParams)
+    private function userFilter(array $searchParams, $isAdmin = true)
     {
         $keyword = Arr::get($searchParams, 'search', '');
-        $role = Arr::get($searchParams, 'role', '');
         $status = Arr::get($searchParams, 'status', null);
 
         $query = $this->model->query()->with('roles');
 
-        if ($role) {
-            $query->role($role);
+        if ($isAdmin) {
+            $query->where('user_id', auth()->id());
         }
 
         if ($keyword) {
             if (is_array($keyword)) {
                 $keyword = $keyword['value'];
             }
-            $query->whereAny([
-                'name',
-                'email',
-                'phone_number',
-                'id',
-            ], 'LIKE', '%' . $keyword . '%');
+            $query->where(function ($q) use ($keyword) {
+                $q->where('id', 'like', '%' . $keyword . '%')
+                    ->orWhereHas('user', function ($q) use ($keyword) {
+                        $q->where('name', 'like', '%' . $keyword . '%');
+                    });
+            });
         }
 
         if (! is_null($status)) {

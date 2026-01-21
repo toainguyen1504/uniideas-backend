@@ -16,13 +16,13 @@ class UserController extends Controller
 {
     use ApiResponses;
 
-     public function __construct(
+    public function __construct(
         protected UserRepositoryInterface $userRepository,
     ) {
-        // $this->middleware('permission:' . Acl::PERMISSION_USER_LIST)->only('index');
-        // $this->middleware('permission:' . Acl::PERMISSION_USER_ADD)->only(['create', 'store']);
-        // $this->middleware('permission:' . Acl::PERMISSION_USER_EDIT)->only(['edit', 'update']);
-        // $this->middleware('permission:' . Acl::PERMISSION_USER_DELETE)->only('destroy');
+        $this->middleware('permission:'.Acl::PERMISSION_USER_LIST)->only('index');
+        $this->middleware('permission:'.Acl::PERMISSION_USER_ADD)->only(['create', 'store']);
+        $this->middleware('permission:'.Acl::PERMISSION_USER_EDIT)->only(['edit', 'update']);
+        $this->middleware('permission:'.Acl::PERMISSION_USER_DELETE)->only('destroy');
     }
 
     /**
@@ -45,7 +45,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $users = $this->userRepository->serverPaginationFiltering($request->all());
+        $users = $this->userRepository->serverPaginationFiltering($request->all(), auth()->user()->isAdmin());
 
         if(!$users) {
             return $this->errorResponse([], 

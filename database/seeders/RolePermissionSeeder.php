@@ -22,12 +22,8 @@ class RolePermissionSeeder extends Seeder
             Role::findOrCreate($role, $guard);
         }
 
-        $permissionNames = array_map(fn($p) => trim($p), Acl::permissions());
-        foreach ($permissionNames as $permissionName) {
-            Permission::firstOrCreate([
-                'name' => $permissionName,
-                'guard_name' => $guard,
-            ]);
+        foreach (Acl::permissions() as $permission) {
+            Permission::findOrCreate($permission, $guard);
         }
 
         $adminRole = Role::findByName(Acl::ROLE_ADMIN, $guard);
@@ -35,15 +31,19 @@ class RolePermissionSeeder extends Seeder
         $qaCoordinatorRole = Role::findByName(Acl::ROLE_QA_COORDINATOR, $guard);
         $staffRole = Role::findByName(Acl::ROLE_STAFF, $guard);
 
-        $permissionModels = Permission::whereIn('name', $permissionNames)
-            ->where('guard_name', $guard)
-            ->get()
-            ->all();
-
-        $adminRole->givePermissionTo($permissionModels);
-        $qaManagerRole->givePermissionTo($permissionModels);
+        $adminRole->givePermissionTo([
+            Acl::PERMISSION_VIEW_ADMIN_MENU_DASHBOARD,
+            Acl::PERMISSION_USER_LIST,
+            Acl::PERMISSION_USER_ADD,
+            Acl::PERMISSION_USER_EDIT,
+            Acl::PERMISSION_USER_DELETE,
+            Acl::PERMISSION_ROLE_MANAGE,
+        ]);
+        $qaManagerRole->givePermissionTo([
+            Acl::PERMISSION_VIEW_QA_MANAGER_MENU_DASHBOARD,
+        ]);
         $qaCoordinatorRole->givePermissionTo([
-            Acl::PERMISSION_VIEW_MENU_DASHBOARD,
+            Acl::PERMISSION_VIEW_QA_COORDINATOR_MENU_DASHBOARD,
         ]);
         $staffRole->givePermissionTo([
             Acl::PERMISSION_VIEW_MENU_DASHBOARD,
