@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -19,6 +20,13 @@ trait ApiResponses
      */
     public function successResponse(mixed $data, string $message = '', int $statusCode = Response::HTTP_OK): JsonResponse
     {
+        // If a single JsonResource is provided, resolve it now so that any
+        // property access inside the resource happens here (and exceptions
+        // bubble) instead of during json_encode which leads to confusing logs.
+        if ($data instanceof JsonResource) {
+            $data = $data->resolve(request());
+        }
+
         $data = $data instanceof AnonymousResourceCollection ? $data->resource : $data;
         if ($data instanceof LengthAwarePaginator) {
             return response()->json([

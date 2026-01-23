@@ -20,8 +20,6 @@ class DepartmentResource extends JsonResource
             'name' => $this->name,
             'status' => $this->status,
             'status_name' => __(Str::title($this->status->name)),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
         ];
     }
 }

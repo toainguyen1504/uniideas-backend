@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Department\StoreDepartmentRequest;
 use App\Http\Requests\Department\UpdateDepartmentRequest;
 use App\Http\Resources\Api\DepartmentResource;
+use App\Http\Resources\Api\UserResource;
 use App\Models\Department;
 use App\Repositories\Department\DepartmentRepository;
 
@@ -145,5 +146,33 @@ class DepartmentController extends Controller
         return $deleted
             ? $this->okResponse([], 'Department deleted successfully.')
             : $this->errorResponse([], 'Failed to delete department.', 422);
+    }
+
+    /**
+     * Get List Users
+     * 
+     * Get list users of a department.
+     * 
+     * @authenticated
+     * 
+     * @response array{
+     *      message: string,
+     *      data: array<\App\Http\Resources\Api\UserResource>,
+     * }
+     * 
+     * @param  \App\Models\Department  $department
+     */
+    public function getUsersOfDepartment(Department $department)
+    {
+        if (!$department) {
+            return $this->errorResponse([], 'Department not found.', 404);
+        }
+        
+        $users = $this->departmentRepository->getUsersByDepartmentId($department->id);
+
+        return $this->okResponse(
+            UserResource::collection($users),
+            'Users retrieved successfully.',
+        );
     }
 }
