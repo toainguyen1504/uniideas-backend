@@ -31,6 +31,8 @@ final class Acl
 
     const PERMISSION_VIEW_MENU_DASHBOARD = 'View Dashboard Menu';
 
+    const PERMISSION_ASSIGNEE = 'Assignee';
+
     const PERMISSION_USER_MANAGE = 'User Management';
 
     const PERMISSION_USER_LIST = 'User List';
@@ -59,8 +61,15 @@ final class Acl
 
     const PERMISSION_CATEGORY_DELETE = 'Delete Submission';
 
-    
+     const PERMISSION_SUBMISSION_LIST = 'Submission List';
 
+    const PERMISSION_SUBMISSION_ADD = 'Add Submission';
+
+    const PERMISSION_SUBMISSION_EDIT = 'Edit Submission';
+
+    const PERMISSION_SUBMISSION_DELETE = 'Delete Submission';
+
+    
 
     /**
      * @param  array  $exclusives Exclude some permissions from the list
