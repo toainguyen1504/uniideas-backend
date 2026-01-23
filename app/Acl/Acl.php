@@ -53,13 +53,23 @@ final class Acl
 
     const PERMISSION_DEPARTMENT_DELETE = 'Delete Department';
 
-    const PERMISSION_SUBMISSION_LIST = 'Submission List';
+    const PERMISSION_CATEGORY_LIST = 'Submission List';
+
+    const PERMISSION_CATEGORY_ADD = 'Add Submission';
+
+    const PERMISSION_CATEGORY_EDIT = 'Edit Submission';
+
+    const PERMISSION_CATEGORY_DELETE = 'Delete Submission';
+
+     const PERMISSION_SUBMISSION_LIST = 'Submission List';
 
     const PERMISSION_SUBMISSION_ADD = 'Add Submission';
 
     const PERMISSION_SUBMISSION_EDIT = 'Edit Submission';
 
     const PERMISSION_SUBMISSION_DELETE = 'Delete Submission';
+
+    
 
     /**
      * @param  array  $exclusives Exclude some permissions from the list
