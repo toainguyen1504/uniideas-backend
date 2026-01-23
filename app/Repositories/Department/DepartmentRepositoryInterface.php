@@ -10,5 +10,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
  */
 interface DepartmentRepositoryInterface extends RepositoryInterface
 {
-    //
+    /**
+     * Get list users by department id
+     */
+    public function getUsersByDepartmentId(int $departmentId);
 }

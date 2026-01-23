@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Category;
 
+use App\Acl\Acl;
 use App\Enum\CategoryStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -10,7 +11,7 @@ class UpdateCategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return checkPermission(Acl::PERMISSION_CATEGORY_EDIT);
     }
 
     public function rules(): array

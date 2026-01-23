@@ -23,4 +23,12 @@ class DepartmentRepository extends BaseRepository implements DepartmentRepositor
         $this->model = $model;
         parent::__construct($model);
     }
+
+    /**
+     * Get list users by department id
+     */
+    public function getUsersByDepartmentId(int $departmentId)
+    {
+        return $this->model->find($departmentId)?->users;
+    }
 }
