@@ -31,6 +31,8 @@ final class Acl
 
     const PERMISSION_VIEW_MENU_DASHBOARD = 'View Dashboard Menu';
 
+    const PERMISSION_ASSIGNEE = 'Assignee';
+
     const PERMISSION_USER_MANAGE = 'User Management';
 
     const PERMISSION_USER_LIST = 'User List';
