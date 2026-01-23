@@ -27,6 +27,7 @@ Route::prefix('v1')
             include 'v1/api/role.php';
             include 'v1/api/category.php';
             include 'v1/api/department.php';
+            include 'v1/api/submission.php';
         });
         include 'v1/api/auth.php';
     });
