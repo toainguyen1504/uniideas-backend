@@ -23,6 +23,12 @@ final class Acl
 
     const ROLE_STAFF = 'Staff';
 
+    const PERMISSION_VIEW_ADMIN_MENU_DASHBOARD = 'View Admin Dashboard Menu';
+
+    const PERMISSION_VIEW_QA_MANAGER_MENU_DASHBOARD = 'View QA Manager Dashboard Menu';
+
+    const PERMISSION_VIEW_QA_COORDINATOR_MENU_DASHBOARD = 'View QA Coordinator Dashboard Menu';
+
     const PERMISSION_VIEW_MENU_DASHBOARD = 'View Dashboard Menu';
 
     const PERMISSION_USER_MANAGE = 'User Management';
@@ -34,6 +40,27 @@ final class Acl
     const PERMISSION_USER_EDIT = 'Edit User';
 
     const PERMISSION_USER_DELETE = 'Delete User';
+
+    const PERMISSION_ROLE_MANAGE = 'Role Management';
+
+    const PERMISSION_DEPARTMENT_LIST = 'Department List';
+
+    const PERMISSION_DEPARTMENT_ADD = 'Add Department';
+
+    const PERMISSION_DEPARTMENT_EDIT = 'Edit Department';
+
+    const PERMISSION_DEPARTMENT_DELETE = 'Delete Department';
+
+    const PERMISSION_CATEGORY_LIST = 'Submission List';
+
+    const PERMISSION_CATEGORY_ADD = 'Add Submission';
+
+    const PERMISSION_CATEGORY_EDIT = 'Edit Submission';
+
+    const PERMISSION_CATEGORY_DELETE = 'Delete Submission';
+
+    
+
 
     /**
      * @param  array  $exclusives Exclude some permissions from the list

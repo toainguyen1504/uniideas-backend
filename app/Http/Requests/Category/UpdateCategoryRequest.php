@@ -22,7 +22,7 @@ class UpdateCategoryRequest extends FormRequest
                 'max:255',
                 Rule::unique('categories')->ignore($this->route('category')),
             ],
-            'status' => ['sometimes', Rule::in(CategoryStatus::values())],
+            'status' => ['required', Rule::in(CategoryStatus::values())],
         ];
     }
 }

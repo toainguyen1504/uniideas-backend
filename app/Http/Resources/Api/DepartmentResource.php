@@ -4,10 +4,11 @@ namespace App\Http\Resources\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Str;
 
-class CategoryResource extends JsonResource
+class DepartmentResource extends JsonResource
 {
-        /**
+    /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
@@ -18,8 +19,9 @@ class CategoryResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'status' => $this->status,
-            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
-            'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+            'status_name' => __(Str::title($this->status->name)),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

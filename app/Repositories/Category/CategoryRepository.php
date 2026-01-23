@@ -3,74 +3,77 @@
 namespace App\Repositories\Category;
 
 use App\Models\Category;
-use App\Enums\CategoryStatus;
+use App\Repositories\BaseRepository;
+use App\Enum\CategoryStatus;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 
-class CategoryRepository implements CategoryRepositoryInterface
+class CategoryRepository extends BaseRepository implements CategoryRepositoryInterface
 {
-    public function __construct(
-        private readonly Category $category
-    ) {}
+    const ITEM_PER_PAGE = 15;
 
     /**
-     * Lấy tất cả categories
+     * {@inheritdoc}
      */
-    public function getAll(): Collection
+    protected $model;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function __construct(Category $model)
     {
-        return $this->category->all();
+        $this->model = $model;
+        parent::__construct($model);
     }
 
     /**
-     * Lấy danh sách phân trang
+     * Lấy danh sách phân trang với filter
      */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    public function serverPaginationFiltering(array $searchParams): LengthAwarePaginator
     {
-        return $this->category->paginate($perPage);
-    }
+        $limit = Arr::get($searchParams, 'limit', self::ITEM_PER_PAGE);
+        $keyword = Arr::get($searchParams, 'search', '');
+        $status = Arr::get($searchParams, 'status', null);
 
-    /**
-     * Tìm category theo ID
-     */
-    public function find(int $id): ?Category
-    {
-        return $this->category->find($id);
-    }
+        $query = $this->model->query();
 
-    /**
-     * Tạo category mới
-     */
-    public function create(array $data): Category
-    {
-        return $this->category->create($data);
-    }
-
-    /**
-     * Cập nhật category
-     */
-    public function update(int $id, array $data): Category
-    {
-        $category = $this->find($id);
-        
-        if (!$category) {
-            throw new \Exception("Category not found", 404);
+        // Filter theo keyword
+        if ($keyword) {
+            $query->where(function ($q) use ($keyword) {
+                $q->where('name', 'like', '%' . $keyword . '%')
+                  ->orWhere('description', 'like', '%' . $keyword . '%');
+            });
         }
 
-        $category->update($data);
-        return $category;
+        // Filter theo status
+        if (!is_null($status)) {
+            $query->where('status', $status);
+        }
+
+        $query->orderBy('created_at', 'desc')->orderBy('id', 'desc');
+
+        return $query->paginate($limit);
     }
 
     /**
-     * Xóa category
+     * Lấy tất cả categories active
      */
-    public function delete(int $id): bool
+    public function getAllActive(): Collection
     {
-        $category = $this->find($id);
-        
-        if (!$category) {
-            throw new \Exception("Category not found", 404);
-        }
+        return $this->model->where('status', CategoryStatus::ACTIVE)
+            ->orderBy('name')
+            ->get();
+    }
 
-        return $category->delete();
+    /**
+     * Lấy categories theo parent
+     */
+    public function getByParentId(?int $parentId = null): Collection
+    {
+        return $this->model->where('parent_id', $parentId)
+            ->where('status', CategoryStatus::ACTIVE)
+            ->orderBy('name')
+            ->get();
     }
 }

@@ -3,76 +3,132 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Traits\ApiResponses;
+use Illuminate\Http\Request;
 use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Resources\Api\CategoryResource;
+use App\Models\Category;
 use App\Repositories\Category\CategoryRepositoryInterface;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use App\Acl\Acl;
 
+/**
+ * @tags Categories Management
+ */
 class CategoryController extends Controller
 {
+    use ApiResponses;
+
     public function __construct(
-        private readonly CategoryRepositoryInterface $repository
-    ) {}
-
-    /**
-     * Get all categories
-     */
-    public function index(Request $request): AnonymousResourceCollection
-    {
-        $categories = $this->repository->getAll();
-        return CategoryResource::collection($categories);
+        protected CategoryRepositoryInterface $categoryRepository,
+    ) {
+//  ko cos middlewere
     }
 
     /**
-     * Create new category
+     * Get Category List
+     * 
+     * Display a listing of the resource.
+     * 
+     * @response array{
+     *   message: string,
+     *   data: \App\Http\Resources\Api\CategoryResource,
+     *   pagination: array{
+     *     current_page: int,
+     *     last_page: int,
+     *     per_page: int,
+     *     total: int
+     *   }
+     * }
      */
-    public function store(StoreCategoryRequest $request): JsonResponse
+    public function index(Request $request)
     {
-        $category = $this->repository->create($request->validated());
+        $categories = $this->categoryRepository->serverPaginationFiltering($request->all());
+        if (!$categories || $categories->isEmpty()) {
+            return $this->errorResponse(
+                [],
+                'No categories found.',
+                404
+            );
+        }
 
-        return response()->json([
-            'message' => 'Category created successfully',
-            'data' => new CategoryResource($category)
-        ], 201);
+        return $this->okResponse(
+            CategoryResource::collection($categories),
+            'Category list retrieved successfully.'
+        );
     }
 
     /**
-     * Get category by ID
+     * Create Category
+     * 
+     * Store a newly created resource in storage.
+     * 
+     * @response array{
+     *   message: string,
+     *   data: \App\Http\Resources\Api\CategoryResource,
+     * }
+     * 
+     * @param \App\Http\Requests\Category\StoreCategoryRequest $request
      */
-    public function show(int $id): JsonResponse
+    public function store(StoreCategoryRequest $request)
     {
-        $category = $this->repository->find($id);
+        $category = $this->categoryRepository->create($request->validated());
 
-        return response()->json([
-            'data' => new CategoryResource($category)
-        ]);
+        return $category
+            ? $this->okResponse(new CategoryResource($category), 'Category created successfully.')
+            : $this->errorResponse([], 'Failed to create category.', 422);
     }
 
     /**
-     * Update category
+     * Show Category Detail
+     * 
+     * Display the specified resource.
+     * 
+     * @response array{
+     *   message: string,
+     *   data: \App\Http\Resources\Api\CategoryResource,
+     * }
      */
-    public function update(UpdateCategoryRequest $request, int $id): JsonResponse
+    public function show(Category $category)
     {
-        $category = $this->repository->update($id, $request->validated());
-
-        return response()->json([
-            'message' => 'Category updated successfully',
-            'data' => new CategoryResource($category)
-        ]);
+        return $this->okResponse(new CategoryResource($category), 'Category details retrieved successfully.');
     }
 
     /**
-     * Delete category
+     * Edit Category
+     * 
+     * Update the specified resource in storage.
+     * 
+     * @response array{
+     *   message: string,
+     *   data: \App\Http\Resources\Api\CategoryResource,
+     * }
      */
-    public function destroy(int $id): JsonResponse
+    public function update(UpdateCategoryRequest $request, Category $category)
     {
-        $this->repository->delete($id);
+        $updatedCategory = $this->categoryRepository->update($category, $request->validated());
 
-        return response()->json([
-            'message' => 'Category deleted successfully'
-        ]);
+        return $updatedCategory
+            ? $this->okResponse(new CategoryResource($updatedCategory), 'Category updated successfully.')
+            : $this->errorResponse([], 'Failed to update category.', 422);
+    }
+
+    /**
+     * Delete Category
+     * 
+     * Remove the specified resource from storage.
+     * 
+     * @response array{
+     *   message: string,
+     *   data: array{},
+     * }
+     */
+    public function destroy(Category $category)
+    {
+        $deleted = $this->categoryRepository->destroy($category->id);
+
+        return $deleted
+            ? $this->okResponse([], 'Category deleted successfully.')
+            : $this->errorResponse([], 'Failed to delete category.', 422);
     }
 }
