@@ -36,4 +36,9 @@ class Department extends Model
             'status' => ActiveStatus::class,
         ];
     }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
+    }
 }

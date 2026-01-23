@@ -11,6 +11,7 @@ use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\Api\UserResource;
 use App\Models\User;
 use App\Repositories\User\UserRepositoryInterface;
+use App\Services\UserService;
 
 /**
  * @tags Users Management
@@ -21,6 +22,7 @@ class UserController extends Controller
 
     public function __construct(
         protected UserRepositoryInterface $userRepository,
+        protected UserService $userService,
     ) {
         $this->middleware('permission:'.Acl::PERMISSION_USER_LIST)->only('index');
         $this->middleware('permission:'.Acl::PERMISSION_USER_ADD)->only(['store']);
@@ -78,7 +80,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        $user = $this->userRepository->create($request->validated());
+        $user = $this->userService->create($request->validated());
         
         return $user
             ? $this->okResponse(new UserResource($user), 'User created successfully.')
@@ -109,7 +111,7 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        $user = $this->userRepository->update($user, $request->validated());
+        $user = $this->userService->update($user, $request->validated());
         
         return $user
             ? $this->okResponse(new UserResource($user), 'User updated successfully.')

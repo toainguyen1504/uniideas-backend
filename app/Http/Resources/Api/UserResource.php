@@ -27,6 +27,7 @@ class UserResource extends JsonResource
             'status_name' => __(Str::title($this->status->name)),
             'badge_name' => UserStatus::getBadge($this->status->value),
             'roles' => RoleResource::collection($this->whenLoaded('roles', $this->roles)),
+            'department' => DepartmentResource::make($this->whenLoaded('department', $this->department)),
             'email_verified' => $this->email_verified_at !== null,
             // 'avatar_url' => $this->avatar_url,
         ];

@@ -14,6 +14,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Acl\Acl;
+use App\Traits\Departmentable;
 
 class User extends Authenticatable implements HasMedia, MustVerifyEmail
 {
@@ -70,5 +71,10 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->hasRole(Acl::ROLE_ADMIN);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 }
