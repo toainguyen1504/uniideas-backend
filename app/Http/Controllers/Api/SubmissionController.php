@@ -23,14 +23,11 @@ class SubmissionController extends Controller
     public function __construct(
         protected SubmissionRepositoryInterface $submissionRepository,
     ) {
-        // Không có middleware (giống CategoryController)
+        // Không có middleware 
     }
 
     /**
      * Get Submission List
-     * 
-     * Display a listing of the resource.
-     * 
      * @response array{
      *   message: string,
      *   data: \App\Http\Resources\Api\SubmissionResource[],
@@ -70,9 +67,6 @@ class SubmissionController extends Controller
 
     /**
      * Create Submission
-     * 
-     * Store a newly created resource in storage.
-     * 
      * @response array{
      *   message: string,
      *   data: \App\Http\Resources\Api\SubmissionResource,
@@ -106,9 +100,6 @@ class SubmissionController extends Controller
 
     /**
      * Show Submission Detail
-     * 
-     * Display the specified resource.
-     * 
      * @response array{
      *   message: string,
      *   data: \App\Http\Resources\Api\SubmissionResource,
@@ -132,9 +123,6 @@ class SubmissionController extends Controller
 
     /**
      * Edit Submission
-     * 
-     * Update the specified resource in storage.
-     * 
      * @response array{
      *   message: string,
      *   data: \App\Http\Resources\Api\SubmissionResource,
@@ -175,43 +163,28 @@ class SubmissionController extends Controller
 
     /**
      * Delete Submission
-     * 
-     * Remove the specified resource from storage.
-     * 
      * @response array{
      *   message: string,
      *   data: array{},
      * }
      */
     public function destroy(DeleteSubmissionRequest $request, Submission $submission)
-    {
-        try {
-            DB::beginTransaction();
-            
-            $deleted = $this->submissionRepository->destroy($submission->id);
-            
-            if (!$deleted) {
-                return $this->errorResponse(
-                    [],
-                    'Failed to delete submission.',
-                    422
-                );
-            }
-            
-            DB::commit();
-            
-            return $this->okResponse(
-                [],
-                'Submission deleted successfully.'
-            );
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            return $this->errorResponse(
-                ['error' => $e->getMessage()],
-                'Failed to delete submission.',
-                422
-            );
-        }
+{
+    try {
+        $submission->delete();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Submission deleted successfully.',
+            'data' => []
+        ], 200);
+        
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to delete submission.',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 }

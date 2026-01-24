@@ -12,7 +12,7 @@ class UpdateSubmissionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // Hoặc thêm logic authorization của bạn
+        return true; 
     }
 
     /**
@@ -28,14 +28,12 @@ class UpdateSubmissionRequest extends FormRequest
                 'string',
                 'max:255',
                 Rule::unique('submissions')
-                    ->whereNull('deleted_at')
-                    ->ignore($submissionId) // Bỏ qua bản ghi hiện tại khi update
+                    ->ignore($submissionId) 
             ],
             'closure_date' => [
                 'sometimes',
                 'date',
                 function ($attribute, $value, $fail) {
-                    // Kiểm tra nếu closure_date được cập nhật, phải trước final_closure_date
                     if ($this->has('final_closure_date') && 
                         $value >= $this->final_closure_date) {
                         $fail('Ngày đóng phải trước ngày đóng cuối.');

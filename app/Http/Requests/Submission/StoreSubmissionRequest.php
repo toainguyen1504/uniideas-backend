@@ -25,7 +25,6 @@ class StoreSubmissionRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('submissions')->whereNull('deleted_at') // Không trùng tên với các bản ghi chưa xóa
             ],
             'closure_date' => [
                 'required',
