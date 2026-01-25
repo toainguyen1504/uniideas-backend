@@ -126,12 +126,19 @@ class CategoryController extends Controller
      *   data: array{},
      * }
      */
-    public function destroy(Category $category)
-    {
-        $deleted = $this->categoryRepository->destroy($category->id);
-
-        return $deleted
-            ? $this->okResponse([], 'Category deleted successfully.')
-            : $this->errorResponse([], 'Failed to delete category.', 422);
+   public function destroy(Category $category)
+{
+    try {
+        $category->delete();
+        
+        return $this->okResponse([], 'Category deleted successfully.');
+        
+    } catch (\Exception $e) {
+        return $this->errorResponse(
+            [], 
+            'Failed to delete category: ' . $e->getMessage(),
+            500
+        );
     }
+}
 }
