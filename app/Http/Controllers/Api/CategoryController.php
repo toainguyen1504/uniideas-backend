@@ -22,7 +22,7 @@ class CategoryController extends Controller
     public function __construct(
         protected CategoryRepositoryInterface $categoryRepository,
     ) {
-        $this->middleware('permission:'.Acl::PERMISSION_CATEGORY_LIST)->only('index');
+        $this->middleware('permission:'.Acl::PERMISSION_CATEGORY_LIST)->only('index', 'show');
         $this->middleware('permission:'.Acl::PERMISSION_CATEGORY_ADD)->only('store');
         $this->middleware('permission:'.Acl::PERMISSION_CATEGORY_EDIT)->only('update');
         $this->middleware('permission:'.Acl::PERMISSION_CATEGORY_DELETE)->only('destroy');
@@ -127,18 +127,11 @@ class CategoryController extends Controller
      * }
      */
    public function destroy(Category $category)
-{
-    try {
-        $category->delete();
-        
-        return $this->okResponse([], 'Category deleted successfully.');
-        
-    } catch (\Exception $e) {
-        return $this->errorResponse(
-            [], 
-            'Failed to delete category: ' . $e->getMessage(),
-            500
-        );
+    {
+        $deleted = $this->categoryRepository->destroy($category);
+
+        return $deleted
+            ? $this->okResponse([], 'Category deleted successfully.')
+            : $this->errorResponse([], 'Failed to delete category.', 422);
     }
-}
 }

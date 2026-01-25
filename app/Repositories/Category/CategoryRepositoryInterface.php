@@ -2,10 +2,11 @@
 
 namespace App\Repositories\Category;
 
+use App\Repositories\RepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
-interface CategoryRepositoryInterface
+interface CategoryRepositoryInterface extends RepositoryInterface
 {
     public function serverPaginationFiltering(array $searchParams): LengthAwarePaginator;
     

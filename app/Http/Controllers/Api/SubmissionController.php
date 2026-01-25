@@ -10,6 +10,7 @@ use App\Http\Requests\Submission\UpdateSubmissionRequest;
 use App\Http\Resources\Api\SubmissionResource;
 use App\Models\Submission;
 use App\Repositories\Submission\SubmissionRepositoryInterface;
+use App\Acl\Acl;
 
 /**
  * @tags Submissions Management
@@ -21,7 +22,10 @@ class SubmissionController extends Controller
     public function __construct(
         protected SubmissionRepositoryInterface $submissionRepository,
     ) {
-        // Không có middleware 
+        $this->middleware('permission:'.Acl::PERMISSION_SUBMISSION_LIST)->only('index', 'show');
+        $this->middleware('permission:'.Acl::PERMISSION_SUBMISSION_ADD)->only('store');
+        $this->middleware('permission:'.Acl::PERMISSION_SUBMISSION_EDIT)->only('update');
+        $this->middleware('permission:'.Acl::PERMISSION_SUBMISSION_DELETE)->only('destroy'); 
     }
 
     /**
