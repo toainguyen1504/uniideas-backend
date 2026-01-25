@@ -2,10 +2,10 @@
 
 namespace App\Repositories\Submission;
 
+use App\Repositories\RepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
 
-interface SubmissionRepositoryInterface
+interface SubmissionRepositoryInterface extends RepositoryInterface
 {
     /**
      * Get paginated submissions with filtering
