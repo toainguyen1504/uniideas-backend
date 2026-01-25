@@ -7,11 +7,9 @@ use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
 use App\Http\Requests\Submission\StoreSubmissionRequest;
 use App\Http\Requests\Submission\UpdateSubmissionRequest;
-use App\Http\Requests\Submission\DeleteSubmissionRequest;
 use App\Http\Resources\Api\SubmissionResource;
 use App\Models\Submission;
 use App\Repositories\Submission\SubmissionRepositoryInterface;
-use Illuminate\Support\Facades\DB;
 
 /**
  * @tags Submissions Management
@@ -41,29 +39,22 @@ class SubmissionController extends Controller
      */
     public function index(Request $request)
     {
-        try {
-            $submissions = $this->submissionRepository->serverPaginationFiltering($request->all());
-            
-            if (!$submissions || $submissions->isEmpty()) {
-                return $this->errorResponse(
-                    [],
-                    'No submissions found.',
-                    404
-                );
-            }
 
-            return $this->okResponse(
-                SubmissionResource::collection($submissions),
-                'Submission list retrieved successfully.'
-            );
-        } catch (\Exception $e) {
+        $submissions = $this->submissionRepository->serverPaginationFiltering($request->all());
+
+        if (!$submissions) {
             return $this->errorResponse(
-                ['error' => $e->getMessage()],
-                'Failed to retrieve submissions.',
-                500
+                [],
+                'No submission found.',
+                404
             );
         }
-    }
+            return $this->okResponse(
+                SubmissionResource::collection($submissions),
+              'submission list retrieved successfully. '
+            );
+        }
+
 
     /**
      * Create Submission
@@ -76,26 +67,11 @@ class SubmissionController extends Controller
      */
     public function store(StoreSubmissionRequest $request)
     {
-        try {
-            DB::beginTransaction();
-            
-            $submission = $this->submissionRepository->create($request->validated());
-            
-            DB::commit();
-            
-            return $this->okResponse(
-                new SubmissionResource($submission),
-                'Submission created successfully.'
-            );
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            return $this->errorResponse(
-                ['error' => $e->getMessage()],
-                'Failed to create submission.',
-                422
-            );
-        }
+        $submissions = $this->submissionRepository->create($request->validated());
+        
+        return $submissions
+            ? $this->okResponse(new SubmissionResource($submissions), 'submission created successfully.')
+            : $this->errorResponse([], 'Failed to create submission.', 422);
     }
 
     /**
@@ -105,21 +81,11 @@ class SubmissionController extends Controller
      *   data: \App\Http\Resources\Api\SubmissionResource,
      * }
      */
-    public function show(Submission $submission)
+      public function show(Submission $submission)
     {
-        try {
-            return $this->okResponse(
-                new SubmissionResource($submission->load('ideas')),
-                'Submission details retrieved successfully.'
-            );
-        } catch (\Exception $e) {
-            return $this->errorResponse(
-                ['error' => $e->getMessage()],
-                'Failed to retrieve submission details.',
-                500
-            );
-        }
+        return $this->okResponse(new SubmissionResource($submission), 'submission details retrieved successfully.');
     }
+
 
     /**
      * Edit Submission
@@ -128,37 +94,13 @@ class SubmissionController extends Controller
      *   data: \App\Http\Resources\Api\SubmissionResource,
      * }
      */
-    public function update(UpdateSubmissionRequest $request, Submission $submission)
+   public function update(UpdateSubmissionRequest $request, Submission $submission)
     {
-        try {
-            // Kiểm tra nếu submission đã finally closed
-            if ($submission->is_final_closed) {
-                return $this->errorResponse(
-                    [],
-                    'Cannot update a finally closed submission.',
-                    403
-                );
-            }
-            
-            DB::beginTransaction();
-            
-            $updatedSubmission = $this->submissionRepository->update($submission, $request->validated());
-            
-            DB::commit();
-            
-            return $this->okResponse(
-                new SubmissionResource($updatedSubmission),
-                'Submission updated successfully.'
-            );
-        } catch (\Exception $e) {
-            DB::rollBack();
-            
-            return $this->errorResponse(
-                ['error' => $e->getMessage()],
-                'Failed to update submission.',
-                422
-            );
-        }
+        $submission = $this->submissionRepository->update($submission, $request->validated());
+        
+        return $submission
+            ? $this->okResponse(new SubmissionResource($submission), 'submission updated successfully.')
+            : $this->errorResponse([], 'Failed to submission user.', 422);
     }
 
     /**
@@ -168,23 +110,12 @@ class SubmissionController extends Controller
      *   data: array{},
      * }
      */
-    public function destroy(DeleteSubmissionRequest $request, Submission $submission)
-{
-    try {
-        $submission->delete();
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Submission deleted successfully.',
-            'data' => []
-        ], 200);
-        
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to delete submission.',
-            'error' => $e->getMessage()
-        ], 500);
+       public function destroy(Submission $submission)
+    {
+        $deleted = $this->submissionRepository->destroy($submission);
+
+        return $deleted
+            ? $this->okResponse([], 'submission deleted successfully.')
+            : $this->errorResponse([], 'Failed to delete submission.', 422);
     }
-}
 }
