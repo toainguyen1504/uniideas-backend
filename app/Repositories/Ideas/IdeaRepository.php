@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Idea;
+namespace App\Repositories\Ideas;
 
 use App\Models\Idea;
 use App\Repositories\BaseRepository;
@@ -12,59 +12,59 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
 {
     const ITEM_PER_PAGE = 5;
 
-    protected $model;
-
     public function __construct(Idea $model)
     {
-        $this->model = $model;
         parent::__construct($model);
     }
 
+    /**
+     * Phân trang + filter theo search params
+     */
     public function serverPaginationFiltering(array $searchParams): LengthAwarePaginator
     {
         $limit = Arr::get($searchParams, 'limit', self::ITEM_PER_PAGE);
 
-        $query = $this->ideaFilter($searchParams);
-
-        $query->orderBy(
-            Arr::get($searchParams, 'sort_by', 'created_at'),
-            Arr::get($searchParams, 'sort_order', 'desc')
-        );
+        $query = $this->applyFilters($searchParams)
+            ->orderBy(
+                Arr::get($searchParams, 'sort_by', 'created_at'),
+                Arr::get($searchParams, 'sort_order', 'desc')
+            );
 
         return $query->paginate($limit);
     }
 
-    private function ideaFilter(array $searchParams)
+    /**
+     * Áp dụng filter cho query
+     */
+    private function applyFilters(array $searchParams)
     {
-        $keyword      = Arr::get($searchParams, 'search', '');
-        $status       = Arr::get($searchParams, 'status', null);
-        $categoryId   = Arr::get($searchParams, 'category_id', null);
-        $submissionId = Arr::get($searchParams, 'submission_id', null);
+        $query = $this->model->newQuery()->with(['user', 'category', 'submission']);
 
-        $query = $this->model->query()->with(['user', 'category', 'submission']);
-
-        if ($keyword) {
-            $query->where(function ($q) use ($keyword) {
-                $q->where('title', 'like', '%' . $keyword . '%')
-                  ->orWhere('content', 'like', '%' . $keyword . '%');
-            });
+        if ($keyword = Arr::get($searchParams, 'search')) {
+            $query->where(fn($q) =>
+                $q->where('title', 'like', "%{$keyword}%")
+                  ->orWhere('content', 'like', "%{$keyword}%")
+            );
         }
 
-        if (! is_null($status)) {
+        if ($status = Arr::get($searchParams, 'status')) {
             $query->where('status', $status);
         }
 
-        if (! is_null($categoryId)) {
+        if ($categoryId = Arr::get($searchParams, 'category_id')) {
             $query->where('category_id', $categoryId);
         }
 
-        if (! is_null($submissionId)) {
+        if ($submissionId = Arr::get($searchParams, 'submission_id')) {
             $query->where('submission_id', $submissionId);
         }
 
         return $query;
     }
 
+    /**
+     * Lấy tất cả ideas đã được duyệt
+     */
     public function getAllApproved(): Collection
     {
         return $this->model->where('status', 'approved')->get();
@@ -80,30 +80,46 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
         return $this->model->where('category_id', $categoryId)->get();
     }
 
-    public function create(array $data, $file = null): Idea
+    /**
+     * Tạo mới idea kèm file upload
+     */
+    public function createWithFile(array $data, $file = null): Idea
     {
         if ($file) {
             $data['file_path'] = $file->store('uploads');
         }
-        return parent::create($data);
+        return $this->create($data);
     }
 
-    public function update(int $id, array $data, $file = null): Idea
+    /**
+     * Cập nhật idea kèm file upload
+     */
+    public function updateWithFile(int $id, array $data, $file = null): ?Idea
     {
         $idea = $this->find($id);
+
+        if (! $idea) {
+            return null; // hoặc throw Exception
+        }
 
         if ($file) {
             $data['file_path'] = $file->store('uploads');
         }
 
-        parent::update($idea, $data);
-
-        return $idea;
+        return $this->update($idea, $data);
     }
 
-    public function delete(int $id): bool
+    /**
+     * Xóa idea
+     */
+    public function deleteById(int $id): bool
     {
         $idea = $this->find($id);
-        return parent::destroy($idea);
+
+        if (! $idea) {
+            return false;
+        }
+
+        return $this->destroy($idea);
     }
 }

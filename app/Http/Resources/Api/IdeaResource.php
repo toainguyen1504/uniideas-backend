@@ -5,6 +5,7 @@ namespace App\Http\Resources\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Enum\IdeaStatus;
+use App\Enum\AnonymousEnum;
 
 class IdeaResource extends JsonResource
 {
@@ -21,14 +22,13 @@ class IdeaResource extends JsonResource
             'slug'           => $this->slug,
             'content'        => $this->content,
             'file_path'      => $this->file_path ?? 'N/A',
-            'status'         => $this->status ?? 'N/A',
-            'status_name'    => $this->status instanceof IdeaStatus 
-                                ? __($this->status->name) 
-                                : 'N/A',
-            'badge_name'     => $this->status instanceof IdeaStatus 
-                                ? IdeaStatus::getBadge($this->status->value) 
-                                : '',
-            'is_anonymous'   => $this->is_anonymous,
+            'status' => $this->status instanceof Ideastatus ?
+            $this->status?->value
+            : Ideastatus::PENDING ->value,
+            'is_anonymous' => $this->is_anonymous instanceof AnonymousEnum
+                ? $this->is_anonymous->value
+                : AnonymousEnum::NOT_ANONYMOUS->value,
+
             'total_views'    => $this->total_views,
             'total_comments' => $this->total_comments,
             'user'           => UserResource::make($this->whenLoaded('user', $this->user)),

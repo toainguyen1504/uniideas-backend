@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Idea;
+namespace App\Repositories\Ideas;
 
 use App\Repositories\RepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -29,18 +29,4 @@ interface IdeaRepositoryInterface extends RepositoryInterface
      */
     public function getByCategoryId(int $categoryId): Collection;
 
-    /**
-     * Tạo mới idea
-     */
-    public function create(array $data, $file = null): Idea;
-
-    /**
-     * Cập nhật idea
-     */
-    public function update(int $id, array $data, $file = null): Idea;
-
-    /**
-     * Xóa idea
-     */
-    public function delete(int $id): bool;
 }

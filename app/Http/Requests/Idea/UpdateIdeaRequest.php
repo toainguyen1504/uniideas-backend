@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Idea;
 
+use App\Enum\AnonymousEnum;
 use App\Enum\IdeaStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -38,9 +39,8 @@ class UpdateIdeaRequest extends FormRequest
                 'sometimes',
                 new Enum(IdeaStatus::class),
             ],
-            'is_anonymous' => [
-                'boolean',
-            ],
+            'is_anonymous' => [ 'sometimes',new Enum(AnonymousEnum::class)],
+
             'user_id' => [
                 'sometimes',
                 'exists:users,id',

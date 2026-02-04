@@ -4,6 +4,7 @@ namespace App\Http\Requests\Idea;
 
 use App\Acl\Acl;
 use App\Enum\IdeaStatus;
+use App\Enum\AnonymousEnum;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
 
@@ -42,9 +43,9 @@ class StoreIdeaRequest extends FormRequest
                 'required',
                 new Enum(IdeaStatus::class),
             ],
-            'is_anonymous' => [
-                'boolean',
-            ],
+            'is_anonymous' => ['required',new Enum(AnonymousEnum::class)],
+
+
             'user_id' => [
                 'required',
                 'exists:users,id',

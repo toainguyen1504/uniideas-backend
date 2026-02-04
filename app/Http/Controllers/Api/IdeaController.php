@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Acl\Acl;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
-use App\Models\Idea;
 use App\Http\Requests\Idea\StoreIdeaRequest;
 use App\Http\Requests\Idea\UpdateIdeaRequest;
 use App\Http\Resources\Api\IdeaResource;
-
+use App\Models\Idea;
+use App\Repositories\Ideas\IdeaRepositoryInterface;
 
 /**
  * @tags Ideas Management
@@ -18,32 +19,35 @@ class IdeaController extends Controller
 {
     use ApiResponses;
 
+    public function __construct(
+        protected IdeaRepositoryInterface $ideaRepository,
+    ) {
+        
+    }
+
     /**
-     * Get Idea List
-     * 
+     * Get Ideas List
+     *
      * Display a listing of the resource.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @response array{
-     *   message: string,
-     *   data: \App\Http\Resources\Api\IdeaResource,
-     *   pagination: array{
-     *     current_page: int,
-     *     last_page: int,
-     *     per_page: int,
-     *     total: int
-     *   }
+     *      message: string,
+     *      data: array<\App\Http\Resources\Api\IdeaResource>,
+     *      pagination: array{
+     *          current_page: int,
+     *          last_page: int,
+     *          per_page: int,
+     *          total: int
+     *      }
      * }
+     *
+     * @param \Illuminate\Http\Request $request
      */
     public function index(Request $request)
     {
-        $ideas = Idea::query()
-            ->when($request->status, fn($q) => $q->where('status', $request->status))
-            ->when($request->category_id, fn($q) => $q->where('category_id', $request->category_id))
-            ->when($request->submission_id, fn($q) => $q->where('submission_id', $request->submission_id))
-            ->orderBy('created_at', 'desc')
-            ->paginate(5);
+        $ideas = $this->ideaRepository->serverPaginationFiltering($request->all());
 
         return $this->okResponse(
             IdeaResource::collection($ideas),
@@ -53,88 +57,92 @@ class IdeaController extends Controller
 
     /**
      * Create Idea
-     * 
+     *
      * Store a newly created resource in storage.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @response array{
-     *   message: string,
-     *   data: \App\Http\Resources\Api\IdeaResource,
+     *      message: string,
+     *      data: \App\Http\Resources\Api\IdeaResource,
      * }
+     *
+     * @param \App\Http\Requests\Idea\StoreIdeaRequest $request
      */
     public function store(StoreIdeaRequest $request)
     {
-        $data = $request->validated();
+        $idea = $this->ideaRepository->create($request->validated(), $request->file('file'));
 
-        if ($request->hasFile('file')) {
-            $data['file_path'] = $request->file('file')->store('uploads');
-        }
-
-        $idea = Idea::create($data);
-
-        return $idea
-            ? $this->okResponse(new IdeaResource($idea), 'Idea created successfully.')
-            : $this->errorResponse([], 'Failed to create idea.', 422);
+        return $this->okResponse(
+            new IdeaResource($idea),
+            'Idea created successfully.'
+        );
     }
 
     /**
      * Show Idea Detail
-     * 
+     *
      * Display the specified resource.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @response array{
-     *   message: string,
-     *   data: \App\Http\Resources\Api\IdeaResource,
+     *      message: string,
+     *      data: \App\Http\Resources\Api\IdeaResource,
      * }
+     *
+     * @param \App\Models\Idea $idea
      */
     public function show(Idea $idea)
     {
-        return $this->okResponse(new IdeaResource($idea), 'Idea details retrieved successfully.');
+        return $this->okResponse(
+            new IdeaResource($idea),
+            'Idea details retrieved successfully.'
+        );
     }
 
     /**
      * Edit Idea
-     * 
+     *
      * Update the specified resource in storage.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @response array{
-     *   message: string,
-     *   data: \App\Http\Resources\Api\IdeaResource,
+     *      message: string,
+     *      data: \App\Http\Resources\Api\IdeaResource,
      * }
+     *
+     * @param \App\Http\Requests\Idea\UpdateIdeaRequest $request
+     * @param \App\Models\Idea $idea
      */
     public function update(UpdateIdeaRequest $request, Idea $idea)
     {
-        $data = $request->validated();
+        $idea = $this->ideaRepository->update($idea, $request->validated(), $request->file('file'));
 
-        if ($request->hasFile('file')) {
-            $data['file_path'] = $request->file('file')->store('uploads');
-        }
-
-        $idea->update($data);
-
-        return $this->okResponse(new IdeaResource($idea), 'Idea updated successfully.');
+        return $this->okResponse(
+            new IdeaResource($idea),
+            'Idea updated successfully.'
+        );
     }
 
     /**
      * Delete Idea
-     * 
+     *
      * Remove the specified resource from storage.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @response array{
-     *   message: string,
-     *   data: array{},
+     *      message: string,
+     *      data: array{},
      * }
+     *
+     * @param \App\Models\Idea $idea
      */
     public function destroy(Idea $idea)
     {
-        $deleted = $idea->delete();
+        $deleted = $this->ideaRepository->destroy($idea);
 
         return $deleted
             ? $this->okResponse([], 'Idea deleted successfully.')

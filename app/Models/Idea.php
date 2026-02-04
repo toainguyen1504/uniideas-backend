@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Enum\IdeaStatus;
+use App\Enum\AnonymousEnum;
+;;
 
 class Idea extends Model
 {
@@ -26,7 +28,7 @@ class Idea extends Model
 
     protected $casts = [
         'status'         => IdeaStatus::class, 
-        'is_anonymous'   => 'boolean',
+        'is_anonymous'   => AnonymousEnum::class,
         'total_views'    => 'integer',
         'total_comments' => 'integer',
     ];
