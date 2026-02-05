@@ -24,33 +24,28 @@ class UpdateIdeaRequest extends FormRequest
                 'string',
                 'max:255',
             ],
-            'slug' => [
-                'sometimes',
-                'string',
-                'max:255',
-                Rule::unique('ideas', 'slug')->ignore($this->route('idea')->id),
-            ],
             'file_path' => [
                 'nullable',
-                'file',
-                'max:2048',
             ],
             'status' => [
-                'sometimes',
+                'nullable',
+                'integer',
                 new Enum(IdeaStatus::class),
             ],
-            'is_anonymous' => [ 'sometimes',new Enum(AnonymousEnum::class)],
-
+            'is_anonymous' => [ 'nullable',new Enum(AnonymousEnum::class)],
             'user_id' => [
                 'sometimes',
+                'integer',
                 'exists:users,id',
             ],
             'category_id' => [
                 'sometimes',
+                'integer',
                 'exists:categories,id',
             ],
             'submission_id' => [
                 'sometimes',
+                'integer',
                 'exists:submissions,id',
             ],
         ];

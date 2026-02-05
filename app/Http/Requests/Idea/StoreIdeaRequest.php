@@ -12,8 +12,7 @@ class StoreIdeaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Check quyền thêm idea, bạn có thể định nghĩa trong Acl
-        return true;
+        return checkPermission(Acl::PERMISSION_IDEA_ADD);
     }
 
     public function rules(): array
@@ -24,38 +23,32 @@ class StoreIdeaRequest extends FormRequest
                 'string',
                 'max:255',
             ],
-            'slug' => [
-                'required',
-                'string',
-                'max:255',
-                'unique:ideas,slug',
-            ],
             'content' => [
                 'required',
                 'string',
             ],
             'file_path' => [
                 'nullable',
-                'file',
-                'max:2048',
             ],
             'status' => [
-                'required',
+                'nullable',
+                'integer',
                 new Enum(IdeaStatus::class),
             ],
-            'is_anonymous' => ['required',new Enum(AnonymousEnum::class)],
-
-
+            'is_anonymous' => ['nullable',new Enum(AnonymousEnum::class)],
             'user_id' => [
                 'required',
+                'integer',
                 'exists:users,id',
             ],
             'category_id' => [
                 'required',
+                'integer',
                 'exists:categories,id',
             ],
             'submission_id' => [
                 'required',
+                'integer',
                 'exists:submissions,id',
             ],
         ];

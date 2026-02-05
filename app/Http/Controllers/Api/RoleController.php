@@ -19,7 +19,7 @@ class RoleController extends Controller
     public function __construct(
         protected RoleRepositoryInterface $roleRepository,
     ) {
-        $this->middleware('permission:'.Acl::PERMISSION_ROLE_MANAGE)->only('index');
+        $this->middleware('permission:' . Acl::PERMISSION_ROLE_MANAGE)->only('index');
     }
     /**
      * Get role list
