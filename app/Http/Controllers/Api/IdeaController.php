@@ -22,7 +22,10 @@ class IdeaController extends Controller
     public function __construct(
         protected IdeaRepositoryInterface $ideaRepository,
     ) {
-        
+        $this->middleware('permission:' . Acl::PERMISSION_IDEA_LIST)->only('index', 'show');
+        $this->middleware('permission:' . Acl::PERMISSION_IDEA_ADD)->only('store');
+        $this->middleware('permission:' . Acl::PERMISSION_IDEA_EDIT)->only('update');
+        $this->middleware('permission:' . Acl::PERMISSION_IDEA_DELETE)->only('destroy');
     }
 
     /**
@@ -71,7 +74,7 @@ class IdeaController extends Controller
      */
     public function store(StoreIdeaRequest $request)
     {
-        $idea = $this->ideaRepository->create($request->validated(), $request->file('file'));
+        $idea = $this->ideaRepository->create($request->validated());
 
         return $this->okResponse(
             new IdeaResource($idea),
@@ -118,7 +121,7 @@ class IdeaController extends Controller
      */
     public function update(UpdateIdeaRequest $request, Idea $idea)
     {
-        $idea = $this->ideaRepository->update($idea, $request->validated(), $request->file('file'));
+        $idea = $this->ideaRepository->update($idea, $request->validated());
 
         return $this->okResponse(
             new IdeaResource($idea),

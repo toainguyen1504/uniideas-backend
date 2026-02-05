@@ -22,10 +22,10 @@ class SubmissionController extends Controller
     public function __construct(
         protected SubmissionRepositoryInterface $submissionRepository,
     ) {
-        $this->middleware('permission:'.Acl::PERMISSION_SUBMISSION_LIST)->only('index', 'show');
-        $this->middleware('permission:'.Acl::PERMISSION_SUBMISSION_ADD)->only('store');
-        $this->middleware('permission:'.Acl::PERMISSION_SUBMISSION_EDIT)->only('update');
-        $this->middleware('permission:'.Acl::PERMISSION_SUBMISSION_DELETE)->only('destroy'); 
+        $this->middleware('permission:' . Acl::PERMISSION_SUBMISSION_LIST)->only('index', 'show');
+        $this->middleware('permission:' . Acl::PERMISSION_SUBMISSION_ADD)->only('store');
+        $this->middleware('permission:' . Acl::PERMISSION_SUBMISSION_EDIT)->only('update');
+        $this->middleware('permission:' . Acl::PERMISSION_SUBMISSION_DELETE)->only('destroy'); 
     }
 
     /**

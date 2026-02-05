@@ -22,10 +22,10 @@ class CategoryController extends Controller
     public function __construct(
         protected CategoryRepositoryInterface $categoryRepository,
     ) {
-        $this->middleware('permission:'.Acl::PERMISSION_CATEGORY_LIST)->only('index', 'show');
-        $this->middleware('permission:'.Acl::PERMISSION_CATEGORY_ADD)->only('store');
-        $this->middleware('permission:'.Acl::PERMISSION_CATEGORY_EDIT)->only('update');
-        $this->middleware('permission:'.Acl::PERMISSION_CATEGORY_DELETE)->only('destroy');
+        $this->middleware('permission:' . Acl::PERMISSION_CATEGORY_LIST)->only('index', 'show');
+        $this->middleware('permission:' . Acl::PERMISSION_CATEGORY_ADD)->only('store');
+        $this->middleware('permission:' . Acl::PERMISSION_CATEGORY_EDIT)->only('update');
+        $this->middleware('permission:' . Acl::PERMISSION_CATEGORY_DELETE)->only('destroy');
     }
 
     /**

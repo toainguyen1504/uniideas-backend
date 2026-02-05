@@ -6,17 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Enum\IdeaStatus;
 use App\Enum\AnonymousEnum;
-;;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Idea extends Model
+class Idea extends Model implements HasMedia
 {
-    use HasFactory;
+    use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
         'title',
         'slug',
         'content',
-        'file_path',
         'status',
         'is_anonymous',
         'total_views',
@@ -33,6 +33,10 @@ class Idea extends Model
         'total_comments' => 'integer',
     ];
 
+    protected $with = ['media'];
+
+    const FILE_PATH_COLLECTION = 'file_path';
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -46,5 +50,26 @@ class Idea extends Model
     public function submission()
     {
         return $this->belongsTo(Submission::class);
+    }
+
+    /**
+     * Get file path for document
+     *
+     * @param string $value
+     * @return string|null
+     */
+    public function getFilePathAttribute($value): ?string
+    {
+        return $this->getFirstMediaUrl(self::FILE_PATH_COLLECTION) ?: null;
+    }
+
+    /**
+     * Register media collections for the model.
+     *
+     * @return void
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(self::FILE_PATH_COLLECTION);
     }
 }
