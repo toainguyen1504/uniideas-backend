@@ -8,6 +8,8 @@ use App\Enum\IdeaStatus;
 use App\Enum\AnonymousEnum;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Idea extends Model implements HasMedia
 {
@@ -71,5 +73,27 @@ class Idea extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection(self::FILE_PATH_COLLECTION);
+    }
+
+    /**
+     * Get reacts for the idea.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function reacts(): HasMany
+    {
+        return $this->hasMany(React::class);
+    }
+
+    /**
+     * Get react for the idea by specific user.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function userReact($userId = null): HasOne
+    {
+        $userId = $userId ?? auth()->id();
+        
+        return $this->hasOne(React::class)->where('user_id', $userId);
     }
 }
