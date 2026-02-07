@@ -8,9 +8,14 @@ use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
 use App\Http\Requests\Idea\StoreIdeaRequest;
 use App\Http\Requests\Idea\UpdateIdeaRequest;
+use App\Http\Resources\Api\CommentResource;
 use App\Http\Resources\Api\IdeaResource;
 use App\Models\Idea;
+use App\Repositories\Comment\CommentRepositoryInterface;
 use App\Repositories\Ideas\IdeaRepositoryInterface;
+use App\Repositories\React\ReactRepositoryInterface;
+use App\Repositories\View\ViewRepositoryInterface;
+use App\Services\ViewService;
 
 /**
  * @tags Ideas Management
@@ -21,6 +26,9 @@ class IdeaController extends Controller
 
     public function __construct(
         protected IdeaRepositoryInterface $ideaRepository,
+        protected CommentRepositoryInterface $commentRepository,
+        protected ReactRepositoryInterface $reactRepository,
+        protected ViewService $viewService,
     ) {
         $this->middleware('permission:' . Acl::PERMISSION_IDEA_LIST)->only('index', 'show');
         $this->middleware('permission:' . Acl::PERMISSION_IDEA_ADD)->only('store');
@@ -92,14 +100,32 @@ class IdeaController extends Controller
      * @response array{
      *      message: string,
      *      data: \App\Http\Resources\Api\IdeaResource,
+     *      comments: array<\App\Http\Resources\Api\CommentResource>,
+     *      comments_count: int,
+     *      likes_count: int,
+     *      dislikes_count: int,
      * }
      *
      * @param \App\Models\Idea $idea
      */
     public function show(Idea $idea)
     {
-        return $this->okResponse(
+        $comments = $this->commentRepository->getCommentsByIdea($idea->id);
+        $commentsCount = $this->commentRepository->countCommentsByIdea($idea->id);
+        $likesCount = $this->reactRepository->countLikesByIdea($idea->id);
+        $dislikesCount = $this->reactRepository->countDislikesByIdea($idea->id);
+
+        if (auth()->check()) {
+            $this->viewService->viewIdea(auth()->id(), $idea->id);
+        }
+
+        return $this->okResponse([
             new IdeaResource($idea),
+                'comments' => CommentResource::collection($comments),
+                'comments_count' => $commentsCount,
+                'likes_count' => $likesCount,
+                'dislikes_count' => $dislikesCount,
+            ],
             'Idea details retrieved successfully.'
         );
     }

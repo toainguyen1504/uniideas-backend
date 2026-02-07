@@ -15,6 +15,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Acl\Acl;
 use App\Traits\Departmentable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable implements HasMedia, MustVerifyEmail
 {
@@ -73,8 +74,33 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         return $this->hasRole(Acl::ROLE_ADMIN);
     }
 
+    /**
+     * Get relation to Deparment.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    /**
+     * Get relation to Reacts.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function reacts(): HasMany
+    {
+        return $this->hasMany(React::class);
+    }
+
+    /**
+     * Get relation to Comments.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
     }
 }
