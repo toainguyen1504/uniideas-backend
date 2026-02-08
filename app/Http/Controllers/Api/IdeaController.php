@@ -11,6 +11,7 @@ use App\Http\Requests\Idea\UpdateIdeaRequest;
 use App\Http\Resources\Api\CommentResource;
 use App\Http\Resources\Api\IdeaResource;
 use App\Models\Idea;
+use App\Services\MailService;
 use App\Repositories\Comment\CommentRepositoryInterface;
 use App\Repositories\Ideas\IdeaRepositoryInterface;
 use App\Repositories\React\ReactRepositoryInterface;
@@ -29,6 +30,7 @@ class IdeaController extends Controller
         protected CommentRepositoryInterface $commentRepository,
         protected ReactRepositoryInterface $reactRepository,
         protected ViewService $viewService,
+        protected MailService $mailService,
     ) {
         $this->middleware('permission:' . Acl::PERMISSION_IDEA_LIST)->only('index', 'show');
         $this->middleware('permission:' . Acl::PERMISSION_IDEA_ADD)->only('store');
@@ -92,8 +94,7 @@ class IdeaController extends Controller
 
     /**
      * Show Idea Detail
-     *
-     * Display the specified resource.
+     *     * Display the specified resource.
      *
      * @authenticated
      *

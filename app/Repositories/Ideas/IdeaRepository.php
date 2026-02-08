@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use App\Jobs\NotifyIdeaModeratorsJob;
 
 class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
 {
@@ -148,8 +149,9 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
                 $idea->load('media');
             }
 
-            DB::commit();
+            NotifyIdeaModeratorsJob::dispatch($idea);
 
+            DB::commit();
             return $idea;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -180,8 +182,9 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
 
             $model->update($data);
 
-            DB::commit();
+            NotifyIdeaModeratorsJob::dispatch($model);
 
+            DB::commit();            
             return $model;
         } catch (\Exception $e) {
             DB::rollBack();
