@@ -22,7 +22,7 @@ Homestead.yaml
 Thumbs.db
 
 # comment để deploy lên hosting
-# .env
-# /node_modules
-# /storage/*.key
-# /vendor
+.env
+/node_modules
+/storage/*.key
+/vendor
