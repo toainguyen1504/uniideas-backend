@@ -1,6 +1,5 @@
 name: Deploy to InfinityFree
 
-# Run manually or on push to the main branch
 on:
   workflow_dispatch:
   push:
@@ -9,38 +8,52 @@ on:
 
 jobs:
   deploy:
-    name: Deploy via FTP
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Clone the latest code from GitHub
+      # 1️ Checkout source code
       - name: Get latest code
         uses: actions/checkout@v4
 
-      # Step 2: Set up PHP environment
+      # 2️ Setup PHP environment
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          # php-version: 8.4
           php-version: 8.2
 
-      # Step 3: Install Composer dependencies
+      # 3️ Cache Composer dependencies (giúp build nhanh hơn)
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      # 4️ Install Composer packages
       - name: Install Composer dependencies
         run: composer install --optimize-autoloader --no-interaction --prefer-dist
-        # run: composer install --no-dev --optimize-autoloader
 
-      # Step 4: Upload code via FTP
+      # (Tuỳ chọn) Nếu CHẮC CHẮN config production ổn định
+      # Nếu không chắc thì có thể bỏ 3 dòng này 
+      # - name: Optimize Laravel
+      #   run: |
+      #     php artisan config:cache
+      #     php artisan route:cache
+      #     php artisan view:cache
+
+      # 5️ Deploy to InfinityFree via FTP
       - name: Deploy to InfinityFree via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ftpupload.net
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /api-uniideas.wuaze.com/htdocs/  # For addon domains
+          server-dir: /api-uniideas.wuaze.com/htdocs/
+          dangerous-clean-slate: false
           exclude: |
             **/.git*
+            **/.github/**
             **/node_modules/**
             **/tests/**
             **/.env
-          # timeout: 86400000
-          # log-level: standard
