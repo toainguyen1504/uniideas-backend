@@ -26,7 +26,8 @@ jobs:
 
       # Step 3: Install Composer dependencies
       - name: Install Composer dependencies
-        run: composer install --no-dev --optimize-autoloader
+        run: composer install --optimize-autoloader --no-interaction --prefer-dist
+        # run: composer install --no-dev --optimize-autoloader
 
       # Step 4: Upload code via FTP
       - name: Deploy to InfinityFree via FTP
