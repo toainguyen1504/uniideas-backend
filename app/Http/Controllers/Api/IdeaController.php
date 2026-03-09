@@ -119,8 +119,9 @@ class IdeaController extends Controller
             $this->viewService->viewIdea(auth()->id(), $idea->id);
         }
 
-        return $this->okResponse([
-            new IdeaResource($idea),
+        return $this->okResponse(
+            [
+                new IdeaResource($idea),
                 'comments' => CommentResource::collection($comments),
                 'comments_count' => $commentsCount,
                 'likes_count' => $likesCount,
@@ -147,6 +148,11 @@ class IdeaController extends Controller
      */
     public function update(UpdateIdeaRequest $request, Idea $idea)
     {
+        $data = $request->validated();
+
+        if (!in_array(auth()->user()->role, ['QA Coordinator', 'Manager', 'Admin'])) {
+            unset($data['is_featured'], $data['intro']);
+        }
         $idea = $this->ideaRepository->update($idea, $request->validated());
 
         return $this->okResponse(

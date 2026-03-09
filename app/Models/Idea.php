@@ -26,6 +26,8 @@ class Idea extends Model implements HasMedia
         'user_id',
         'category_id',
         'submission_id',
+        'is_featured', 
+        'intro', 
     ];
 
     protected $casts = [
@@ -33,6 +35,7 @@ class Idea extends Model implements HasMedia
         'is_anonymous'   => AnonymousEnum::class,
         'total_views'    => 'integer',
         'total_comments' => 'integer',
+        'is_futured' => 'boolean',
     ];
 
     protected $with = ['media'];

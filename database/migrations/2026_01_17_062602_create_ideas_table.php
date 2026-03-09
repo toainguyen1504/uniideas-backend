@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignId('submission_id')->constrained('submissions')->cascadeOnDelete();
             $table->timestamps();
 
-            // Index cho các trường thường query
+           
             $table->index('status');
             $table->index(['user_id', 'submission_id']);
         });
