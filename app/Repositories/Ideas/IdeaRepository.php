@@ -139,6 +139,8 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
                 $data['slug'] = Str::slug($data['title']);
             }
 
+            $data['user_id'] = auth()->id();
+
             $idea = $this->model->create($data);
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
@@ -169,6 +171,10 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
 
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);
+            }
+
+            if (isset($data['user_id']) && $data['user_id'] !== $model->user_id) {
+                $data['user_id'] = auth()->id();
             }
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {

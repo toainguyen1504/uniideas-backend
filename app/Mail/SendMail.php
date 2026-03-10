@@ -35,7 +35,7 @@ class SendMail extends Mailable
     public function build()
     {
         return $this->subject('Send Mail from UniIdeas')
-            ->view('Mails.send_mail')
+            ->view('mails.send_mail')
             ->with(['data' => $this->data]);
     }
 }

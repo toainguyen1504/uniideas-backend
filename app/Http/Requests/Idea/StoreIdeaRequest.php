@@ -35,11 +35,9 @@ class StoreIdeaRequest extends FormRequest
                 'integer',
                 new Enum(IdeaStatus::class),
             ],
-            'is_anonymous' => ['nullable',new Enum(AnonymousEnum::class)],
-            'user_id' => [
-                'required',
-                'integer',
-                'exists:users,id',
+            'is_anonymous' => [
+                'nullable',
+                new Enum(AnonymousEnum::class)
             ],
             'category_id' => [
                 'required',

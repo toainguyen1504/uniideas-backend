@@ -21,7 +21,13 @@ class MailService
         $emails = User::role(Acl::ROLE_QA_COORDINATOR)->pluck('email')->filter()->unique();
 
         foreach ($emails as $email) {
-            Mail::to($email)->send(new SendMail($data));
+            // Mail::to($email)->send(new SendMail($data));
+            // Mail::mailer('mailtrap')->to($email)->send(new SendMail($data));
+
+            Mail::to($email)->queue(new SendMail($data));
+            Mail::mailer('mailtrap')->to($email)->queue(new SendMail($data));
+
+            sleep(2);
         }
     }
 
@@ -39,7 +45,11 @@ class MailService
             return;
         }
 
-        Mail::to($user->email)->send(new SendMail($data));
+        // Mail::to($user->email)->send(new SendMail($data));
+        // Mail::mailer('mailtrap')->to($user->email)->send(new SendMail($data));
+
+        Mail::to($user->email)->queue(new SendMail($data));
+        Mail::mailer('mailtrap')->to($user->email)->queue(new SendMail($data));
     }
 
     /**
