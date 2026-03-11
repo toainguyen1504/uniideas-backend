@@ -16,6 +16,7 @@ use App\Repositories\Comment\CommentRepositoryInterface;
 use App\Repositories\Ideas\IdeaRepositoryInterface;
 use App\Repositories\React\ReactRepositoryInterface;
 use App\Repositories\View\ViewRepositoryInterface;
+use App\Services\IdeaService;
 use App\Services\ViewService;
 
 /**
@@ -31,6 +32,7 @@ class IdeaController extends Controller
         protected ReactRepositoryInterface $reactRepository,
         protected ViewService $viewService,
         protected MailService $mailService,
+        protected IdeaService $ideaService,
     ) {
         $this->middleware('permission:' . Acl::PERMISSION_IDEA_LIST)->only('index', 'show');
         $this->middleware('permission:' . Acl::PERMISSION_IDEA_ADD)->only('store');
@@ -84,7 +86,7 @@ class IdeaController extends Controller
      */
     public function store(StoreIdeaRequest $request)
     {
-        $idea = $this->ideaRepository->create($request->validated());
+        $idea = $this->ideaService->create($request->validated());
 
         return $this->okResponse(
             new IdeaResource($idea),
@@ -148,7 +150,7 @@ class IdeaController extends Controller
      */
     public function update(UpdateIdeaRequest $request, Idea $idea)
     {
-        $idea = $this->ideaRepository->update($idea, $request->validated());
+        $idea = $this->ideaService->update($idea, $request->validated());
 
         return $this->okResponse(
             new IdeaResource($idea),

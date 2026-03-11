@@ -11,6 +11,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use App\Jobs\NotifyIdeaModeratorsJob;
+use App\Notifications\NewIdeaNotification;
+use Illuminate\Support\Facades\Notification;
 
 class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
 {

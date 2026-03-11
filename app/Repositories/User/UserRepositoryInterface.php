@@ -14,4 +14,9 @@ interface UserRepositoryInterface extends RepositoryInterface
      * @inheritdoc
      */
     public function serverPaginationFiltering($searchParams): LengthAwarePaginator;
+
+    /**
+     * Get users by QA Coordinator role
+     */
+    public function getUsersByQACoordinatorRole();
 }
