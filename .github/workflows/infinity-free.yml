@@ -41,7 +41,7 @@ jobs:
           server: ftp.uniideas.io.vn
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /public_html/api/
+          server-dir: /public_html/api.uniideas.io.vn/
           dangerous-clean-slate: false
           exclude: |
             **/.git*
