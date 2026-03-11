@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use App\Acl\Acl;
 
 /**
  * The repository for User Model
@@ -69,5 +70,15 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         }
 
         return $query;
+    }
+
+    /**
+     * Get users by QA Coordinator role
+     */
+    public function getUsersByQACoordinatorRole()
+    {
+        return $this->model->whereHas('roles', function ($q) {
+            $q->where('name', Acl::ROLE_QA_COORDINATOR);
+        })->get();
     }
 }
