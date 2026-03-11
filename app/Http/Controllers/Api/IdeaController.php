@@ -58,7 +58,9 @@ class IdeaController extends Controller
      */
     public function index(Request $request)
     {
+       
         $ideas = $this->ideaRepository->serverPaginationFiltering($request->all());
+
 
         return $this->okResponse(
             IdeaResource::collection($ideas),
@@ -148,11 +150,7 @@ class IdeaController extends Controller
      */
     public function update(UpdateIdeaRequest $request, Idea $idea)
     {
-        $data = $request->validated();
 
-        if (!in_array(auth()->user()->role, ['QA Coordinator', 'Manager', 'Admin'])) {
-            unset($data['is_featured'], $data['intro']);
-        }
         $idea = $this->ideaRepository->update($idea, $request->validated());
 
         return $this->okResponse(

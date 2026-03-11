@@ -35,7 +35,7 @@ class Idea extends Model implements HasMedia
         'is_anonymous'   => AnonymousEnum::class,
         'total_views'    => 'integer',
         'total_comments' => 'integer',
-        'is_futured' => 'boolean',
+        'is_featured' => 'boolean',
     ];
 
     protected $with = ['media'];

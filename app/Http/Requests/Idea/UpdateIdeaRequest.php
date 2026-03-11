@@ -32,7 +32,7 @@ class UpdateIdeaRequest extends FormRequest
                 'integer',
                 new Enum(IdeaStatus::class),
             ],
-            'is_anonymous' => [ 'nullable',new Enum(AnonymousEnum::class)],
+            'is_anonymous' => ['nullable', new Enum(AnonymousEnum::class)],
             'user_id' => [
                 'sometimes',
                 'integer',
@@ -48,6 +48,9 @@ class UpdateIdeaRequest extends FormRequest
                 'integer',
                 'exists:submissions,id',
             ],
+
+            'is_featured' => ['sometimes', 'boolean'],
+            'intro'       => ['sometimes', 'string'],
         ];
     }
 }
