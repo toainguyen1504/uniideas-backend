@@ -1,4 +1,4 @@
-name: Deploy to InfinityFree
+name: Deploy to InterData Hosting
 
 on:
   workflow_dispatch:
@@ -21,7 +21,7 @@ jobs:
         with:
           php-version: 8.2
 
-      # 3️ Cache Composer dependencies (giúp build nhanh hơn)
+      # 3️ Cache Composer dependencies
       - name: Cache Composer dependencies
         uses: actions/cache@v3
         with:
@@ -34,22 +34,14 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --optimize-autoloader --no-interaction --prefer-dist
 
-      # (Tuỳ chọn) Nếu CHẮC CHẮN config production ổn định
-      # Nếu không chắc thì có thể bỏ 3 dòng này 
-      # - name: Optimize Laravel
-      #   run: |
-      #     php artisan config:cache
-      #     php artisan route:cache
-      #     php artisan view:cache
-
-      # 5️ Deploy to InfinityFree via FTP
-      - name: Deploy to InfinityFree via FTP
+      # 5️ Deploy to InterData via FTP
+      - name: Deploy to InterData via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ftpupload.net
+          server: ftp.uniideas.io.vn
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /api-uniideas.wuaze.com/htdocs/
+          server-dir: /public_html/api/
           dangerous-clean-slate: false
           exclude: |
             **/.git*

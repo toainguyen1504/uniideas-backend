@@ -90,7 +90,7 @@ return [
      * ```
      */
     'servers' => [
-        'Live' => 'https://' . parse_url(config('app.url'), PHP_URL_HOST) .'/api',
+        'Live' => 'https://' . 'api.' . parse_url(config('app.url'), PHP_URL_HOST) . '/api',
     ],
 
     /**
