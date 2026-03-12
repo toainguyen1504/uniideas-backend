@@ -166,9 +166,6 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
         try {
             DB::beginTransaction();
 
-            if (!in_array(auth()->user()->role, ['QA Coordinator', 'Manager', 'Admin'])) {
-                unset($data['is_featured'], $data['intro']);
-            }
 
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);

@@ -12,7 +12,7 @@ class UpdateSubmissionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; 
+        return true;
     }
 
     /**
@@ -28,27 +28,31 @@ class UpdateSubmissionRequest extends FormRequest
                 'string',
                 'max:255',
                 Rule::unique('submissions')
-                    ->ignore($submissionId) 
+                    ->ignore($submissionId)
             ],
             'closure_date' => [
                 'sometimes',
-                'date',
+                 'date_format:"j-n-Y H:i"',
                 function ($attribute, $value, $fail) {
-                    if ($this->has('final_closure_date') && 
-                        $value >= $this->final_closure_date) {
-                        $fail('Ngày đóng phải trước ngày đóng cuối.');
+                    if (
+                        $this->has('final_closure_date') &&
+                        $value >= $this->final_closure_date
+                    ) {
+                        $fail('The closing date must be before the closing date.');
                     }
                 }
             ],
             'final_closure_date' => [
                 'sometimes',
-                'date',
+                 'date_format:"j-n-Y H:i"',
                 'after:closure_date',
                 function ($attribute, $value, $fail) {
-                    // Kiểm tra nếu final_closure_date được cập nhật, phải sau closure_date
-                    if ($this->has('closure_date') && 
-                        $value <= $this->closure_date) {
-                        $fail('Ngày đóng cuối phải sau ngày đóng.');
+
+                    if (
+                        $this->has('closure_date') &&
+                        $value <= $this->closure_date
+                    ) {
+                        $fail('The final closing date must be after the closing date.');
                     }
                 }
             ],
@@ -75,12 +79,13 @@ class UpdateSubmissionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.unique' => 'Tên submission đã tồn tại.',
-            'closure_date.date' => 'Ngày đóng không đúng định dạng.',
-            'final_closure_date.date' => 'Ngày đóng cuối không đúng định dạng.',
-            'final_closure_date.after' => 'Ngày đóng cuối phải sau ngày đóng.',
+            'name.unique' => 'The submission name already exists.',
+            'closure_date.date' => 'The closure date is not in the correct format.',
+            'final_closure_date.date' => 'The final closure date is not in the correct format.',
+            'final_closure_date.after' => 'The final closure date must be after the closure date.',
         ];
     }
+
 
     /**
      * Get custom attributes for validator errors.
@@ -88,9 +93,9 @@ class UpdateSubmissionRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => 'tên submission',
-            'closure_date' => 'ngày đóng',
-            'final_closure_date' => 'ngày đóng cuối',
+            'name' => 'submission name',
+            'closure_date' => 'closure date',
+            'final_closure_date' => 'final closure date',
         ];
     }
 }
