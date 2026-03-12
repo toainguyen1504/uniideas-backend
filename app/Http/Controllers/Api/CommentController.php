@@ -8,6 +8,7 @@ use App\Http\Requests\Comment\StoreCommentRequest;
 use App\Http\Requests\Comment\UpdateCommentRequest;
 use App\Models\Comment;
 use App\Repositories\Comment\CommentRepositoryInterface;
+use App\Services\CommentService;
 use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
 
@@ -19,6 +20,7 @@ class CommentController extends Controller
     use ApiResponses;
     public function __construct(
         protected CommentRepositoryInterface $commentRepository,
+        protected CommentService $commentService,
     ) {
         //
     }
@@ -39,7 +41,7 @@ class CommentController extends Controller
      */
     public function store(StoreCommentRequest $request)
     {
-        return $this->commentRepository->create($request->validated()) 
+        return $this->commentService->create($request->validated()) 
             ? $this->okResponse([], 'Comment created successfully.')
             : $this->errorResponse([], 'Failed to create comment.', 422);
     }
@@ -61,7 +63,7 @@ class CommentController extends Controller
      */
     public function update(UpdateCommentRequest $request, Comment $comment)
     {
-        return $this->commentRepository->update($comment, $request->validated()) 
+        return $this->commentService->update($comment, $request->validated()) 
             ? $this->okResponse([], 'Comment updated successfully.')
             : $this->errorResponse([], 'Failed to update comment.', 422);
     }
