@@ -39,8 +39,10 @@ class CommentService
 
             $comment = $this->commentRepository->create($data);
 
-            if ($comment->idea->user_id !== auth()->id()) {
-                Notification::send($comment->idea->user, new NewCommentIdeaNotification(auth()->user(), $comment, $comment->idea));
+            $ideaOwner = $comment->idea->user ?? null;
+
+            if ($ideaOwner && $ideaOwner->id !== auth()->id()) {
+                $ideaOwner->notify(new NewCommentIdeaNotification(auth()->user(), $comment, $comment->idea));
                 NotifyCommentIdeaJob::dispatch($comment, $comment->idea);
             }
 

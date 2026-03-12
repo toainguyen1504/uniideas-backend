@@ -81,4 +81,49 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             $q->where('name', Acl::ROLE_QA_COORDINATOR);
         })->get();
     }
+
+    /**
+     * Get notifications of user.
+     */
+    public function getUserNotifications($model, bool $unreadOnly = false, int $perPage = 20): LengthAwarePaginator
+    {
+        $query = $model->notifications();
+
+        if ($unreadOnly) {
+            $query = $model->unreadNotifications();
+        }
+
+        return $query->paginate($perPage);
+    }
+
+    /**
+     * Get count of unread notifications of user.
+     */
+    public function getUnreadCount($model): int
+    {
+        return $model->unreadNotifications()->count();
+    }
+
+    /**
+     * Mark a notification as read for the user.
+     */
+    public function markAsRead($model, string $notificationId): bool
+    {
+        $notification = $model->notifications()->find($notificationId);
+
+        if ($notification) {
+            $notification->markAsRead();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Mark all notifications as read for the user.
+     */
+    public function markAllAsRead($model): void
+    {
+        $model->unreadNotifications->markAsRead();
+    }
 }
