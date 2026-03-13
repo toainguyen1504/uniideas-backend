@@ -25,19 +25,21 @@ class StoreSubmissionRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
+                Rule::unique('submissions', 'name'),
             ],
             'closure_date' => [
                 'required',
-                 'date_format:"j-n-Y H:i"',
-                'after_or_equal:today' // Ngày đóng phải từ hôm nay trở đi
+                'date_format:j-n-Y H:i',
+                'after_or_equal:today',
             ],
             'final_closure_date' => [
                 'required',
-                 'date_format:"j-n-Y H:i"',
-                'after:closure_date' // Ngày đóng cuối phải sau ngày đóng
+                'date_format:j-n-Y H:i',
+                'after:closure_date',
             ],
         ];
     }
+
 
     /**
      * Get custom messages for validator errors.

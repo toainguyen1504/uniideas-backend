@@ -27,34 +27,17 @@ class UpdateSubmissionRequest extends FormRequest
                 'sometimes',
                 'string',
                 'max:255',
-                Rule::unique('submissions')
-                    ->ignore($submissionId)
+                Rule::unique('submissions')->ignore($submissionId),
             ],
             'closure_date' => [
                 'sometimes',
-                 'date_format:"j-n-Y H:i"',
-                function ($attribute, $value, $fail) {
-                    if (
-                        $this->has('final_closure_date') &&
-                        $value >= $this->final_closure_date
-                    ) {
-                        $fail('The closing date must be before the closing date.');
-                    }
-                }
+                'date_format:j-n-Y H:i',
+                'before:final_closure_date',
             ],
             'final_closure_date' => [
                 'sometimes',
-                 'date_format:"j-n-Y H:i"',
+                'date_format:j-n-Y H:i',
                 'after:closure_date',
-                function ($attribute, $value, $fail) {
-
-                    if (
-                        $this->has('closure_date') &&
-                        $value <= $this->closure_date
-                    ) {
-                        $fail('The final closing date must be after the closing date.');
-                    }
-                }
             ],
         ];
     }
@@ -80,12 +63,12 @@ class UpdateSubmissionRequest extends FormRequest
     {
         return [
             'name.unique' => 'The submission name already exists.',
-            'closure_date.date' => 'The closure date is not in the correct format.',
-            'final_closure_date.date' => 'The final closure date is not in the correct format.',
+            'closure_date.date_format' => 'The closure date is not in the correct format.',
+            'final_closure_date.date_format' => 'The final closure date is not in the correct format.',
             'final_closure_date.after' => 'The final closure date must be after the closure date.',
+            'closure_date.before' => 'The closure date must be before the final closure date.',
         ];
     }
-
 
     /**
      * Get custom attributes for validator errors.
