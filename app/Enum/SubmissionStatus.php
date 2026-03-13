@@ -54,6 +54,7 @@ enum SubmissionStatus: string
             self::CLOSED => 'Submission is closed for new ideas but still active',
             self::FINALLY_CLOSED => 'Submission is completely closed',
         };
+        
     }
     
 }

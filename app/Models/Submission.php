@@ -147,4 +147,6 @@ class Submission extends Model
   {
     return $this->scopeByStatus($query, SubmissionStatus::FINALLY_CLOSED);
   }
+
+  
 }

@@ -58,7 +58,7 @@ class IdeaController extends Controller
      */
     public function index(Request $request)
     {
-       
+
         $ideas = $this->ideaRepository->serverPaginationFiltering($request->all());
 
 
@@ -84,12 +84,12 @@ class IdeaController extends Controller
      */
     public function store(StoreIdeaRequest $request)
     {
-        $idea = $this->ideaRepository->create($request->validated());
-
-        return $this->okResponse(
-            new IdeaResource($idea),
-            'Idea created successfully.'
-        );
+        try {
+            $idea = $this->ideaRepository->create($request->validated());
+            return response()->json($idea, 201);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 403);
+        }
     }
 
     /**

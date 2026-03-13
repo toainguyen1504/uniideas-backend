@@ -116,25 +116,37 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     /**
      * Xóa idea
      */
-    public function deleteById(int $id): bool
+    public function destroy($model): bool
     {
-        $idea = $this->find($id);
 
-        if (! $idea) {
-            return false;
+        $idea = $model instanceof Idea ? $model : $this->find($model);
+
+        if (!$idea) return false;
+
+        $submission = $idea->submission;
+
+   
+        if (!$submission->status->canBeModified()) {
+            abort(403, 'Submission is read-only. Cannot delete idea.');
         }
 
-        return $this->destroy($idea);
+
+        return parent::destroy($idea);
     }
 
     /**
-     * Override create method to return Idea
+     * Override create method
      */
     public function create($data)
     {
-        try {
-            DB::beginTransaction();
 
+        $submission = \App\Models\Submission::findOrFail($data['submission_id']);
+        if (!$submission->status->canAcceptIdeas()) {
+            throw new \Exception('Ideas cannot be submitted after Closure Date.');
+        }
+
+        DB::beginTransaction();
+        try {
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);
             }
@@ -150,11 +162,10 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
             }
 
             DB::commit();
-
             return $idea;
         } catch (\Exception $e) {
             DB::rollBack();
-            return null;
+            throw $e;
         }
     }
 
@@ -163,10 +174,14 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
      */
     public function update($model, $data)
     {
+        // Kiểm tra trạng thái READ-ONLY
+        $submission = $model->submission;
+        if (!$submission->status->canBeModified()) {
+            throw new \Exception('Submission is read-only. Cannot update idea.');
+        }
+
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-
-
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);
             }
@@ -176,18 +191,16 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
                 $model->addMedia($data['file_path'])
                     ->usingFileName($data['file_path']->getClientOriginalName())
                     ->toMediaCollection($this->model::FILE_PATH_COLLECTION);
-
                 $model->load('media');
             }
 
             $model->update($data);
 
             DB::commit();
-
             return $model;
         } catch (\Exception $e) {
             DB::rollBack();
-            return null;
+            throw $e;
         }
     }
 }
