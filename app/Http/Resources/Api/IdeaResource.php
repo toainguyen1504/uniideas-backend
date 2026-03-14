@@ -29,9 +29,7 @@ class IdeaResource extends JsonResource
             'is_anonymous' => $this->is_anonymous instanceof AnonymousEnum
                 ? $this->is_anonymous->value
                 : AnonymousEnum::NOT_ANONYMOUS->value,
-
             'is_featured' => (bool) $this->is_featured,
-
             'total_views'    => $this->total_views,
             'total_comments' => $this->total_comments,
             'user'           => UserResource::make($this->whenLoaded('user', $this->user)),
