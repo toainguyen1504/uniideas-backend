@@ -103,7 +103,7 @@ class IdeaService
             $idea->update($data);
 
             DB::commit();            
-            return $model;
+            return $idea;
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
