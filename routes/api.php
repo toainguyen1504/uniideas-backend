@@ -31,6 +31,8 @@ Route::prefix('v1')
             include 'v1/api/idea.php';
             include 'v1/api/react.php';
             include 'v1/api/comment.php';
+            include 'v1/api/mail.php';
+            include 'v1/api/notification.php';
         });
         include 'v1/api/auth.php';
     });

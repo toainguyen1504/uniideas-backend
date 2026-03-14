@@ -11,10 +11,12 @@ use App\Http\Requests\Idea\UpdateIdeaRequest;
 use App\Http\Resources\Api\CommentResource;
 use App\Http\Resources\Api\IdeaResource;
 use App\Models\Idea;
+use App\Services\MailService;
 use App\Repositories\Comment\CommentRepositoryInterface;
 use App\Repositories\Ideas\IdeaRepositoryInterface;
 use App\Repositories\React\ReactRepositoryInterface;
 use App\Repositories\View\ViewRepositoryInterface;
+use App\Services\IdeaService;
 use App\Services\ViewService;
 
 /**
@@ -29,6 +31,8 @@ class IdeaController extends Controller
         protected CommentRepositoryInterface $commentRepository,
         protected ReactRepositoryInterface $reactRepository,
         protected ViewService $viewService,
+        protected MailService $mailService,
+        protected IdeaService $ideaService,
     ) {
         $this->middleware('permission:' . Acl::PERMISSION_IDEA_LIST)->only('index', 'show');
         $this->middleware('permission:' . Acl::PERMISSION_IDEA_ADD)->only('store');
@@ -84,18 +88,17 @@ class IdeaController extends Controller
      */
     public function store(StoreIdeaRequest $request)
     {
-        try {
-            $idea = $this->ideaRepository->create($request->validated());
-            return response()->json($idea, 201);
-        } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 403);
-        }
+        $idea = $this->ideaRepository->create($request->validated());
+
+        return $this->okResponse(
+            new IdeaResource($idea),
+            'Idea created successfully.'
+        );
     }
 
     /**
      * Show Idea Detail
-     *
-     * Display the specified resource.
+     *     * Display the specified resource.
      *
      * @authenticated
      *
@@ -150,8 +153,7 @@ class IdeaController extends Controller
      */
     public function update(UpdateIdeaRequest $request, Idea $idea)
     {
-
-        $idea = $this->ideaRepository->update($idea, $request->validated());
+        $idea = $this->ideaService->update($idea, $request->validated());
 
         return $this->okResponse(
             new IdeaResource($idea),

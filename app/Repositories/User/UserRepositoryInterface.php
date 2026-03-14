@@ -14,4 +14,29 @@ interface UserRepositoryInterface extends RepositoryInterface
      * @inheritdoc
      */
     public function serverPaginationFiltering($searchParams): LengthAwarePaginator;
+
+    /**
+     * Get users by QA Coordinator role
+     */
+    public function getUsersByQACoordinatorRole();
+
+    /**
+     * Get notifications of user.
+     */
+    public function getUserNotifications($model, bool $unreadOnly = false, int $perPage = 20): LengthAwarePaginator;
+
+    /**
+     * Get count of unread notifications of user.
+     */
+    public function getUnreadCount($model): int;
+
+    /**
+     * Mark a notification as read for the user.
+     */
+    public function markAsRead($model, string $notificationId): bool;
+
+    /**
+     * Mark all notifications as read for the user.
+     */
+    public function markAllAsRead($model): void;
 }

@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Comment;
 
+use App\Jobs\NotifyCommentIdeaJob;
 use App\Models\Comment;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
@@ -39,22 +40,12 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
             $data['user_id'] = auth()->id();
             $data['idea_id'] = Arr::get($data, 'idea_id');
 
-            // Lấy submission từ idea
-            $idea = \App\Models\Idea::findOrFail($data['idea_id']);
-            $submission = $idea->submission;
-
-            // Kiểm tra trạng thái comment
-            if (!$submission->status->canComment()) {
-                return response()->json([
-                    'message' => 'Comments are closed after Final Closure Date.'
-                ], 422);
-            }
-
-            $comment = $this->model->create($data);
+            $react = $this->model->create($data);
 
             DB::commit();
-            return $comment;
-        } catch (\Throwable $e) {
+
+            return $react;
+        } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
                 'message' => $e->getMessage()
@@ -84,6 +75,8 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
 
 
             $model->update($data);
+
+            NotifyCommentIdeaJob::dispatch($model, $model->idea);
 
             DB::commit();
             return $model;
