@@ -12,7 +12,7 @@ class StoreSubmissionRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; 
+        return true;
     }
 
     /**
@@ -25,19 +25,21 @@ class StoreSubmissionRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
+                Rule::unique('submissions', 'name'),
             ],
             'closure_date' => [
                 'required',
-                'date',
-                'after_or_equal:today' // Ngày đóng phải từ hôm nay trở đi
+                'date_format:j-n-Y H:i',
+                'after_or_equal:today',
             ],
             'final_closure_date' => [
                 'required',
-                'date',
-                'after:closure_date' // Ngày đóng cuối phải sau ngày đóng
+                'date_format:j-n-Y H:i',
+                'after:closure_date',
             ],
         ];
     }
+
 
     /**
      * Get custom messages for validator errors.
@@ -45,14 +47,15 @@ class StoreSubmissionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Tên submission là bắt buộc.',
-            'name.unique' => 'Tên submission đã tồn tại.',
-            'closure_date.required' => 'Ngày đóng là bắt buộc.',
-            'closure_date.after_or_equal' => 'Ngày đóng phải từ hôm nay trở đi.',
-            'final_closure_date.required' => 'Ngày đóng cuối là bắt buộc.',
-            'final_closure_date.after' => 'Ngày đóng cuối phải sau ngày đóng.',
+            'name.required' => 'Submission name is required.',
+            'name.unique' => 'Submission name already exists.',
+            'closure_date.required' => 'Closure date is required.',
+            'closure_date.after_or_equal' => 'Closure date must be today or later.',
+            'final_closure_date.required' => 'Final closure date is required.',
+            'final_closure_date.after' => 'Final closure date must be after the closure date.',
         ];
     }
+
 
     /**
      * Get custom attributes for validator errors.
@@ -60,9 +63,9 @@ class StoreSubmissionRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'name' => 'tên submission',
-            'closure_date' => 'ngày đóng',
-            'final_closure_date' => 'ngày đóng cuối',
+            'name' => 'submission name',
+            'closure_date' => 'closure date',
+            'final_closure_date' => 'final closure date',
         ];
     }
 }

@@ -47,9 +47,10 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
         $query = $this->model->newQuery()->with(['user', 'category', 'submission']);
 
         if ($keyword = Arr::get($searchParams, 'search')) {
-            $query->where(fn($q) =>
+            $query->where(
+                fn($q) =>
                 $q->where('title', 'like', "%{$keyword}%")
-                  ->orWhere('content', 'like', "%{$keyword}%")
+                    ->orWhere('content', 'like', "%{$keyword}%")
             );
         }
 
@@ -170,6 +171,7 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     {
         try {
             DB::beginTransaction();
+
 
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);

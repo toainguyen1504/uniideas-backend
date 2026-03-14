@@ -49,6 +49,15 @@ class StoreIdeaRequest extends FormRequest
                 'integer',
                 'exists:submissions,id',
             ],
+            'is_featured' => [
+                'nullable',
+                'boolean'
+            ],
+            'intro'       => [
+                'nullable',
+                'string'
+            ],
+
         ];
     }
 }

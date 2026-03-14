@@ -35,7 +35,7 @@ class SubmissionRepository extends BaseRepository implements SubmissionRepositor
                 'column' => 'created_at',
                 'type' => 'desc'
             ],
-            'pagination' => $params['per_page'] ?? 15,
+            'pagination' => $params['per_page'] ?? 5,
         ];
         
         if (!empty($conditions)) {

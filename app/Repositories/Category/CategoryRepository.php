@@ -11,7 +11,7 @@ use Illuminate\Support\Arr;
 
 class CategoryRepository extends BaseRepository implements CategoryRepositoryInterface
 {
-    const ITEM_PER_PAGE = 15;
+    const ITEM_PER_PAGE = 5;
 
     /**
      * {@inheritdoc}
@@ -25,6 +25,7 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
     {
         $this->model = $model;
         parent::__construct($model);
+        
     }
 
     /**
@@ -32,6 +33,7 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
      */
     public function serverPaginationFiltering(array $searchParams): LengthAwarePaginator
     {
+        
         $limit = Arr::get($searchParams, 'limit', self::ITEM_PER_PAGE);
         $keyword = Arr::get($searchParams, 'search', '');
         $status = Arr::get($searchParams, 'status', null);

@@ -46,7 +46,9 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $categories = $this->categoryRepository->serverPaginationFiltering($request->all());
+
+    $categories = $this->categoryRepository
+        ->serverPaginationFiltering($request->all());
         if (!$categories || $categories->isEmpty()) {
             return $this->errorResponse(
                 [],
@@ -126,7 +128,7 @@ class CategoryController extends Controller
      *   data: array{},
      * }
      */
-   public function destroy(Category $category)
+    public function destroy(Category $category)
     {
         $deleted = $this->categoryRepository->destroy($category);
 

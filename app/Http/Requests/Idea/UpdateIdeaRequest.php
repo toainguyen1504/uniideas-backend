@@ -46,6 +46,9 @@ class UpdateIdeaRequest extends FormRequest
                 'integer',
                 'exists:submissions,id',
             ],
+
+            'is_featured' => ['sometimes', 'boolean'],
+            'intro'       => ['sometimes', 'string'],
         ];
     }
 }

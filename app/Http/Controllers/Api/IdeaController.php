@@ -62,7 +62,9 @@ class IdeaController extends Controller
      */
     public function index(Request $request)
     {
+       
         $ideas = $this->ideaRepository->serverPaginationFiltering($request->all());
+
 
         return $this->okResponse(
             IdeaResource::collection($ideas),
@@ -122,8 +124,9 @@ class IdeaController extends Controller
             $this->viewService->viewIdea(auth()->id(), $idea->id);
         }
 
-        return $this->okResponse([
-            new IdeaResource($idea),
+        return $this->okResponse(
+            [
+                new IdeaResource($idea),
                 'comments' => CommentResource::collection($comments),
                 'comments_count' => $commentsCount,
                 'likes_count' => $likesCount,
