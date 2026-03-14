@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Comment;
 
+use App\Jobs\NotifyCommentIdeaJob;
 use App\Models\Comment;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
@@ -39,11 +40,13 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
             $data['user_id'] = auth()->id();
             $data['idea_id'] = Arr::get($data, 'idea_id');
 
-            $react = $this->model->create($data);
+            $comment = $this->model->create($data);
+
+            NotifyCommentIdeaJob::dispatch($comment, $comment->idea);
 
             DB::commit();
 
-            return $react;
+            return $comment;
         } catch (\Exception $e) {
             DB::rollBack();
             return null;
@@ -61,6 +64,8 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
             $data['idea_id'] = $model->idea_id;
 
             $model->update($data);
+
+            NotifyCommentIdeaJob::dispatch($model, $model->idea);
 
             DB::commit();
 

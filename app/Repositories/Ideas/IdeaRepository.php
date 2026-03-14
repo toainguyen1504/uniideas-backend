@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use App\Jobs\NotifyIdeaModeratorsJob;
+use App\Notifications\NewIdeaNotification;
+use Illuminate\Support\Facades\Notification;
 
 class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
 {
@@ -139,6 +142,8 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
                 $data['slug'] = Str::slug($data['title']);
             }
 
+            $data['user_id'] = auth()->id();
+
             $idea = $this->model->create($data);
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
@@ -149,8 +154,9 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
                 $idea->load('media');
             }
 
-            DB::commit();
+            NotifyIdeaModeratorsJob::dispatch($idea);
 
+            DB::commit();
             return $idea;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -171,6 +177,10 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
                 $data['slug'] = Str::slug($data['title']);
             }
 
+            if (isset($data['user_id']) && $data['user_id'] !== $model->user_id) {
+                $data['user_id'] = auth()->id();
+            }
+
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
                 $model->clearMediaCollection($this->model::FILE_PATH_COLLECTION);
                 $model->addMedia($data['file_path'])
@@ -182,8 +192,9 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
 
             $model->update($data);
 
-            DB::commit();
+            NotifyIdeaModeratorsJob::dispatch($model);
 
+            DB::commit();            
             return $model;
         } catch (\Exception $e) {
             DB::rollBack();
