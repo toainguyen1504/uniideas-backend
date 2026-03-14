@@ -3,6 +3,7 @@
 namespace App\Repositories\Ideas;
 
 use App\Models\Idea;
+use App\Models\Submission;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -125,12 +126,9 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
 
         $submission = $idea->submission;
 
-   
         if (!$submission->status->canBeModified()) {
-            abort(403, 'Submission is read-only. Cannot delete idea.');
+            return false;
         }
-
-
         return parent::destroy($idea);
     }
 
@@ -140,10 +138,13 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     public function create($data)
     {
 
-        $submission = \App\Models\Submission::findOrFail($data['submission_id']);
+        $submission = Submission::findOrFail($data['submission_id']);
         if (!$submission->status->canAcceptIdeas()) {
-            throw new \Exception('Ideas cannot be submitted after Closure Date.');
+            return response()->json([
+                'message' => 'Ideas cannot be submitted after Closure Date.'
+            ], 422);
         }
+
 
         DB::beginTransaction();
         try {
@@ -163,10 +164,11 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
 
             DB::commit();
             return $idea;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            throw $e;
-        }
+        } catch (\Throwable $e) {
+        DB::rollBack();
+        return response()->json([
+            'message' => $e->getMessage()
+        ], 422);
     }
 
     /**
@@ -177,9 +179,10 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
         // Kiểm tra trạng thái READ-ONLY
         $submission = $model->submission;
         if (!$submission->status->canBeModified()) {
-            throw new \Exception('Submission is read-only. Cannot update idea.');
+            return response()->json([
+                'message' => 'Submission is read-only. Cannot update idea.'
+            ], 422);
         }
-
         DB::beginTransaction();
         try {
             if (isset($data['title'])) {
@@ -200,7 +203,9 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
             return $model;
         } catch (\Exception $e) {
             DB::rollBack();
-            throw $e;
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
         }
     }
 }

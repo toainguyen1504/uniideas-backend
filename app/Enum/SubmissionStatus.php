@@ -29,6 +29,13 @@ enum SubmissionStatus: string
     }
 
     /**
+     * Check if submission allows comments
+     */
+    public function canComment(): bool
+    {
+        return $this === self::OPEN || $this === self::CLOSED;
+    }
+    /**
      * Check if status allows adding new ideas
      */
     public function canAcceptIdeas(): bool
@@ -44,17 +51,17 @@ enum SubmissionStatus: string
         return $this !== self::FINALLY_CLOSED;
     }
 
+
+
     /**
      * Get description for status
      */
     public function description(): string
     {
-        return match($this) {
+        return match ($this) {
             self::OPEN => 'Submission is open for new ideas',
             self::CLOSED => 'Submission is closed for new ideas but still active',
             self::FINALLY_CLOSED => 'Submission is completely closed',
         };
-        
     }
-    
 }
