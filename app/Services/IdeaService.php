@@ -111,7 +111,7 @@ class IdeaService
 
             $idea->update($data);
 
-            DB::commit();
+            DB::commit();            
             return $idea;
         } catch (\Exception $e) {
             DB::rollBack();
