@@ -40,18 +40,33 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
             $data['user_id'] = auth()->id();
             $data['idea_id'] = Arr::get($data, 'idea_id');
 
-            $react = $this->model->create($data);
+            // Lấy submission từ idea
+            $idea = \App\Models\Idea::findOrFail($data['idea_id']);
+            $submission = $idea->submission;
+
+            // Kiểm tra trạng thái comment
+            if (!$submission->status->canComment()) {
+                return response()->json([
+                    'message' => 'Comments are closed after Final Closure Date.'
+                ], 422);
+            }
+
+            // Tạo comment
+            $comment = $this->model->create($data);
+
+            // Dispatch notify job
+            NotifyCommentIdeaJob::dispatch($comment, $comment->idea);
 
             DB::commit();
-
-            return $react;
-        } catch (\Exception $e) {
+            return $comment;
+        } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
                 'message' => $e->getMessage()
             ], 422);
         }
     }
+
     /**
      * Override update method.
      */

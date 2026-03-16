@@ -31,6 +31,13 @@ class CommentService
      */
     public function create($data)
     {
+        $idea = \App\Models\Idea::findOrFail(Arr::get($data, 'idea_id'));
+        $submission = $idea->submission;
+
+        if (!$submission->status->canComment()) {
+            return null; 
+        }
+
         try {
             DB::beginTransaction();
 

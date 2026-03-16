@@ -88,17 +88,27 @@ class IdeaController extends Controller
      */
     public function store(StoreIdeaRequest $request)
     {
-        $idea = $this->ideaRepository->create($request->validated());
+        try {
+            $idea = $this->ideaService->create($request->validated());
 
-        return $this->okResponse(
-            new IdeaResource($idea),
-            'Idea created successfully.'
-        );
+            if (!$idea) {
+                return response()->json([
+                    'message' => 'Ideas cannot be submitted after Closure Date.'
+                ], 422);
+            }
+            return $this->okResponse(
+                new IdeaResource($idea),
+                'Idea created successfully.'
+            );
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
     }
+
 
     /**
      * Show Idea Detail
-     *     * Display the specified resource.
+     *     
      *
      * @authenticated
      *
@@ -151,15 +161,22 @@ class IdeaController extends Controller
      * @param \App\Http\Requests\Idea\UpdateIdeaRequest $request
      * @param \App\Models\Idea $idea
      */
-    public function update(UpdateIdeaRequest $request, Idea $idea)
+    public function update(Request $request, Idea $idea)
     {
-        $idea = $this->ideaService->update($idea, $request->validated());
+        $updated = $this->ideaService->update($idea, $request->all());
 
-        return $this->okResponse(
-            new IdeaResource($idea),
-            'Idea updated successfully.'
-        );
+        if (!$updated) {
+            return response()->json([
+                'message' => 'Submission is read-only. Cannot update idea.'
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'Idea updated successfully.',
+            'data' => new IdeaResource($updated)
+        ]);
     }
+
 
     /**
      * Delete Idea

@@ -43,6 +43,10 @@ class IdeaService
             $data['user_id'] = auth()->id();
 
             $idea = $this->ideaRepository->create($data);
+            if (!$idea) {
+                DB::rollBack();
+                return null;
+            }
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
                 $idea->addMedia($data['file_path'])
@@ -59,7 +63,7 @@ class IdeaService
 
             if ($qaCoordinators->isNotEmpty()) {
                 Notification::send(
-                    $qaCoordinators, 
+                    $qaCoordinators,
                     new NewIdeaNotification(auth()->user(), $idea)
                 );
             }
@@ -80,6 +84,11 @@ class IdeaService
      */
     public function update(Idea $idea, array $data)
     {
+        $submission = $idea->submission;
+
+        if (!$submission->canBeModified()) {
+            return null; // chỉ trả về null
+        }
         try {
             DB::beginTransaction();
 
@@ -102,12 +111,28 @@ class IdeaService
 
             $idea->update($data);
 
-            DB::commit();            
-            return $model;
+            DB::commit();
+            return $idea;
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
             return null;
+        }
+    }
+
+    public function destroy(Idea $idea): bool
+    {
+        try {
+            DB::beginTransaction();
+
+            $deleted = $this->ideaRepository->destroy($idea);
+
+            DB::commit();
+            return $deleted;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Delete Idea Failed: ' . $e->getMessage());
+            return false;
         }
     }
 }

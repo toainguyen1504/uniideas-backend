@@ -48,10 +48,9 @@ enum SubmissionStatus: string
      */
     public function canBeModified(): bool
     {
-        return $this !== self::FINALLY_CLOSED;
+     
+        return $this === self::OPEN;
     }
-
-
 
     /**
      * Get description for status

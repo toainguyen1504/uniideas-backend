@@ -24,19 +24,13 @@ class SubmissionResource extends JsonResource
             'closure_date_formatted' => $this->closure_date
                 ? $this->closure_date->setTimezone('Asia/Ho_Chi_Minh')->format('H:i | d/m/Y')
                 : null,
-
-            // Ngày đóng cuối raw
             'final_closure_date' => $this->final_closure_date,
-            // Ngày đóng cuối formatted
             'final_closure_date_formatted' => $this->final_closure_date
                 ? $this->final_closure_date->setTimezone('Asia/Ho_Chi_Minh')->format('H:i | d/m/Y')
                 : null,
-
             'status' => $this->status->value,
-
             'is_closed'       => $this->is_closed,
             'is_final_closed' => $this->is_final_closed,
-
             'created_at' => $this->created_at
                 ? $this->created_at->setTimezone('Asia/Ho_Chi_Minh')->format('Y-m-d H:i:s')
                 : null,

@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use App\Jobs\NotifyIdeaModeratorsJob;
 use App\Notifications\NewIdeaNotification;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
 class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
@@ -138,16 +139,13 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     /**
      * Override create method
      */
-    public function create($data)
+    public function create($data): ?Idea
     {
-
         $submission = Submission::findOrFail($data['submission_id']);
-        if (!$submission->status->canAcceptIdeas()) {
-            return response()->json([
-                'message' => 'Ideas cannot be submitted after Closure Date.'
-            ], 422);
-        }
+        if (!$submission->canAcceptIdeas()) {
 
+            return null;
+        }
 
         DB::beginTransaction();
         try {
@@ -172,23 +170,22 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
             DB::commit();
             return $idea;
         } catch (\Throwable $e) {
-        DB::rollBack();
-        return response()->json([
-            'message' => $e->getMessage()
-        ], 422);
+            DB::rollBack();
+            Log::error('Create Idea Failed: ' . $e->getMessage());
+            return null;
+        }
     }
+
 
     /**
      * Override update method to return Idea
      */
     public function update($model, $data)
     {
-        // Kiểm tra trạng thái READ-ONLY
         $submission = $model->submission;
-        if (!$submission->status->canBeModified()) {
-            return response()->json([
-                'message' => 'Submission is read-only. Cannot update idea.'
-            ], 422);
+
+        if (!$submission->canBeModified()) {
+            return null;
         }
         DB::beginTransaction();
         try {
@@ -213,9 +210,8 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
             NotifyIdeaModeratorsJob::dispatch($model);
 
             DB::commit();
-
             return $model;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json([
                 'message' => $e->getMessage()
