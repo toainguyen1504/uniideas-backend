@@ -32,15 +32,13 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
      * Lấy danh sách phân trang với filter
      */
     public function serverPaginationFiltering(array $searchParams): LengthAwarePaginator
-    {
-        
+    {  
         $limit = Arr::get($searchParams, 'limit', self::ITEM_PER_PAGE);
         $keyword = Arr::get($searchParams, 'search', '');
         $status = Arr::get($searchParams, 'status', null);
 
         $query = $this->model->query();
 
-        // Filter theo keyword
         if ($keyword) {
             $query->where(function ($q) use ($keyword) {
                 $q->where('name', 'like', '%' . $keyword . '%')
@@ -48,7 +46,6 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
             });
         }
 
-        // Filter theo status
         if (!is_null($status)) {
             $query->where('status', $status);
         }

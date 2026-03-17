@@ -11,6 +11,7 @@ use App\Http\Requests\Idea\UpdateIdeaRequest;
 use App\Http\Resources\Api\CommentResource;
 use App\Http\Resources\Api\IdeaResource;
 use App\Models\Idea;
+use App\Models\Submission;
 use App\Services\MailService;
 use App\Repositories\Comment\CommentRepositoryInterface;
 use App\Repositories\Ideas\IdeaRepositoryInterface;
@@ -18,6 +19,7 @@ use App\Repositories\React\ReactRepositoryInterface;
 use App\Repositories\View\ViewRepositoryInterface;
 use App\Services\IdeaService;
 use App\Services\ViewService;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @tags Ideas Management
@@ -62,13 +64,17 @@ class IdeaController extends Controller
      */
     public function index(Request $request)
     {
-       
         $ideas = $this->ideaRepository->serverPaginationFiltering($request->all());
 
-
-        return $this->okResponse(
-            IdeaResource::collection($ideas),
-            'Idea list retrieved successfully.'
+        return $this->okResponse([
+            'data' => IdeaResource::collection($ideas),
+            'pagination' => [
+                'current_page' => $ideas->currentPage(),
+                'last_page' => $ideas->lastPage(),
+                'per_page' => $ideas->perPage(),
+                'total' => $ideas->total(),
+            ]
+            ], 'Idea list retrieved successfully.'
         );
     }
 
@@ -86,9 +92,19 @@ class IdeaController extends Controller
      *
      * @param \App\Http\Requests\Idea\StoreIdeaRequest $request
      */
-    public function store(StoreIdeaRequest $request)
+
+
+   public function store(StoreIdeaRequest $request)
     {
         $idea = $this->ideaService->create($request->validated());
+
+        if (!$idea) {
+            return $this->errorResponse(
+                null,
+                'Ideas cannot be submitted after Closure Date.',
+                422
+            );
+        }
 
         return $this->okResponse(
             new IdeaResource($idea),
@@ -98,7 +114,7 @@ class IdeaController extends Controller
 
     /**
      * Show Idea Detail
-     *     * Display the specified resource.
+     *     
      *
      * @authenticated
      *
@@ -153,11 +169,19 @@ class IdeaController extends Controller
      */
     public function update(UpdateIdeaRequest $request, Idea $idea)
     {
-        $idea = $this->ideaService->update($idea, $request->validated());
+        $updated = $this->ideaService->update($idea, $request->validated());
 
-        return $this->okResponse(
-            new IdeaResource($idea),
-            'Idea updated successfully.'
+        if (!$updated) {
+            return $this->okResponse(
+                null,
+                'Submission is read-only. Cannot update idea.',
+                422
+            );
+        }
+
+        return $this->okResponse([
+            'data' => new IdeaResource($updated),
+            ], 'Idea updated successfully.'
         );
     }
 

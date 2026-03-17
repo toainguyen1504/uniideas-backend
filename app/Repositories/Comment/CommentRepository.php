@@ -30,53 +30,6 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
     }
 
     /**
-     * Override create method.
-     */
-    public function create($data)
-    {
-        try {
-            DB::beginTransaction();
-
-            $data['user_id'] = auth()->id();
-            $data['idea_id'] = Arr::get($data, 'idea_id');
-
-            $comment = $this->model->create($data);
-
-            NotifyCommentIdeaJob::dispatch($comment, $comment->idea);
-
-            DB::commit();
-
-            return $comment;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return null;
-        }
-    }
-    /**
-     * Override update method.
-     */
-    public function update($model, $data)
-    {
-        try {
-            DB::beginTransaction();
-
-            $data['user_id'] = auth()->id();
-            $data['idea_id'] = $model->idea_id;
-
-            $model->update($data);
-
-            NotifyCommentIdeaJob::dispatch($model, $model->idea);
-
-            DB::commit();
-
-            return $model;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return null;
-        }
-    }
-
-    /**
      * Get comments by Idea.
      */
     public function getCommentsByIdea(int $ideaId): Collection

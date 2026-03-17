@@ -19,4 +19,12 @@ enum UserStatus: int
             default => '',
         };
     }
+
+    public function getName(): string
+    {
+        return match ($this) {
+            self::ACTIVE => __('Active'),
+            self::DISABLED => __('Disabled'),
+        };
+    }
 }

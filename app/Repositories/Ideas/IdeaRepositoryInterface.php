@@ -29,4 +29,9 @@ interface IdeaRepositoryInterface extends RepositoryInterface
      */
     public function getByCategoryId(int $categoryId): Collection;
 
+    /**
+     * Get idea by id
+     */
+    public function getIdeaById($ideaId);
+
 }

@@ -3,14 +3,17 @@
 namespace App\Services;
 
 use App\Acl\Acl;
+use App\Enum\SubmissionStatus;
 use App\Repositories\User\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use App\Jobs\NotifyIdeaModeratorsJob;
 use App\Models\Idea;
+use App\Models\Submission;
 use App\Notifications\NewIdeaNotification;
 use App\Repositories\Ideas\IdeaRepositoryInterface;
+use App\Repositories\Submission\SubmissionRepositoryInterface;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 
@@ -20,10 +23,12 @@ class IdeaService
      * Summary of __construct
      *
      * @param UserRepositoryInterface $userRepository
+     * @param IdeaRepositoryInterface $ideaRepository
      */
     public function __construct(
         protected UserRepositoryInterface $userRepository,
         protected IdeaRepositoryInterface $ideaRepository,
+        protected SubmissionRepositoryInterface $submissionRepository,
     ) {
         //
     }
@@ -31,15 +36,19 @@ class IdeaService
     /**
      * Override create method to return Idea
      */
-    public function create($data)
+    public function create(array $data): ?Idea
     {
+        $submissionId = $data['submission_id'] ?? null;
+        $submission = $this->submissionRepository->getSubmissionWithStatus($submissionId);
+
+        if ($submission->status !== SubmissionStatus::OPEN) {
+            return null;
+        }
+        
         try {
             DB::beginTransaction();
 
-            if (isset($data['title'])) {
-                $data['slug'] = Str::slug($data['title']);
-            }
-
+            $data['slug'] = Str::slug($data['title'] ?? '');
             $data['user_id'] = auth()->id();
 
             $idea = $this->ideaRepository->create($data);
@@ -47,8 +56,7 @@ class IdeaService
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
                 $idea->addMedia($data['file_path'])
                     ->usingFileName($data['file_path']->getClientOriginalName())
-                    ->toMediaCollection($idea::FILE_PATH_COLLECTION);
-
+                    ->toMediaCollection(Idea::FILE_PATH_COLLECTION);
                 $idea->load('media');
             }
 
@@ -67,6 +75,7 @@ class IdeaService
             NotifyIdeaModeratorsJob::dispatch($idea);
 
             DB::commit();
+
             return $idea;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -78,29 +87,36 @@ class IdeaService
     /**
      * Override update method to return Idea
      */
-    public function update(Idea $idea, array $data)
+    public function update($model, $data)
     {
+        $submissionId = $data['submission_id'] ?? null;
+        if ($submissionId) {
+            $submission = $this->submissionRepository->getSubmissionWithStatus($submissionId);
+            if ($submission->status !== SubmissionStatus::OPEN) {
+                return null;
+            }
+        }
+        
         try {
             DB::beginTransaction();
-
+            
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);
             }
 
-            if (isset($data['user_id']) && $data['user_id'] !== $idea->user_id) {
+            if (isset($data['user_id']) && $data['user_id'] !== $model->user_id) {
                 $data['user_id'] = auth()->id();
             }
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
-                $idea->clearMediaCollection($idea::FILE_PATH_COLLECTION);
-                $idea->addMedia($data['file_path'])
+                $model->clearMediaCollection($this->model::FILE_PATH_COLLECTION);
+                $model->addMedia($data['file_path'])
                     ->usingFileName($data['file_path']->getClientOriginalName())
-                    ->toMediaCollection($idea::FILE_PATH_COLLECTION);
-
-                $idea->load('media');
+                    ->toMediaCollection($this->model::FILE_PATH_COLLECTION);
+                $model->load('media');
             }
 
-            $idea->update($data);
+            $model->update($data);
 
             DB::commit();            
             return $idea;

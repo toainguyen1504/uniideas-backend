@@ -54,6 +54,7 @@ class UpdateSubmissionRequest extends FormRequest
                 'final_closure_date' => $this->final_closure_date,
             ]);
         }
+        
     }
 
     /**

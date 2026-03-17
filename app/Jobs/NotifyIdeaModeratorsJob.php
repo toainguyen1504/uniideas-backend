@@ -35,7 +35,7 @@ class NotifyIdeaModeratorsJob implements ShouldQueue
 
         $content = [
             'title' => "New idea has been created.",
-            'body' => "The idea titled '{$idea->title}' created by {$idea->user->name}.",
+            'body' => "The idea title '{$idea->title}' created by {$idea->user->name}.",
         ];
 
         $mailService->notifyManagers([

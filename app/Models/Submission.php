@@ -20,7 +20,9 @@ class Submission extends Model
   protected $casts = [
     'closure_date' => 'datetime',
     'final_closure_date' => 'datetime',
-    // Không cần cast status vì nó là computed attribute
+    'status' => SubmissionStatus::class,
+    'is_closed' => 'boolean',
+    'is_final_closed' => 'boolean',
   ];
 
   protected $appends = [
@@ -39,6 +41,7 @@ class Submission extends Model
    */
   public function getStatusAttribute(): SubmissionStatus
   {
+
     if (now()->greaterThan($this->final_closure_date)) {
       return SubmissionStatus::FINALLY_CLOSED;
     }
