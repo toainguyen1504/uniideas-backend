@@ -47,7 +47,7 @@ class CommentController extends Controller
         if (!$comment) {
             return $this->errorResponse(
                 null,
-                'Failed to create comment.',
+                'Comments are closed after Final Closure Date.',
                 422
             );
         }
@@ -57,6 +57,7 @@ class CommentController extends Controller
             'Comment created successfully.'
         );
     }
+
     /**
      * Update Comment
      * 
@@ -74,10 +75,22 @@ class CommentController extends Controller
      */
     public function update(UpdateCommentRequest $request, Comment $comment)
     {
-        return $this->commentService->update($comment, $request->validated())
-            ? $this->okResponse([], 'Comment updated successfully.')
-            : $this->errorResponse([], 'Failed to update comment.', 422);
+        $updated = $this->commentService->update($comment, $request->validated());
+
+        if (!$updated) {
+            return $this->errorResponse(
+                null,
+                'Submission is read-only. Cannot update comment.',
+                422
+            );
+        }
+
+        return $this->okResponse(
+            new CommentResource($updated),
+            'Comment updated successfully.'
+        );
     }
+
 
     /**
      * Delete Comment

@@ -11,6 +11,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
+use App\Models\Idea;
 
 class CommentService
 {
@@ -29,56 +30,52 @@ class CommentService
     /**
      * Override create method.
      */
-    public function create($data)
+    public function create(array $data): ?Comment
     {
-        $idea = \App\Models\Idea::findOrFail(Arr::get($data, 'idea_id'));
+        $idea = Idea::findOrFail($data['idea_id']);
         $submission = $idea->submission;
 
         if (!$submission->status->canComment()) {
-            return null; 
+            return null;
         }
 
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-
             $data['user_id'] = auth()->id();
-            $data['idea_id'] = Arr::get($data, 'idea_id');
-
             $comment = $this->commentRepository->create($data);
 
-            $ideaOwner = $comment->idea->user ?? null;
-
-            if ($ideaOwner && $ideaOwner->id !== auth()->id()) {
-                $ideaOwner->notify(new NewCommentIdeaNotification(auth()->user(), $comment, $comment->idea));
-                NotifyCommentIdeaJob::dispatch($comment, $comment->idea);
-            }
+            NotifyCommentIdeaJob::dispatch($comment, $idea);
 
             DB::commit();
-
             return $comment;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Create Comment Failed: ' . $e->getMessage());
             return null;
         }
     }
+
     /**
      * Override update method.
      */
-    public function update(Comment $comment, $data)
+    public function update(Comment $comment, array $data): ?Comment
     {
+        $submission = $comment->idea->submission;
+
+        if (!$submission->status->canBeModified()) {
+            return null; // chặn khi read-only
+        }
+
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-
             $data['user_id'] = auth()->id();
-            $data['idea_id'] = $comment->idea_id;
+            $this->commentRepository->update($comment, $data);
 
-            $comment->update($data);
+            NotifyCommentIdeaJob::dispatch($comment, $comment->idea);
 
             DB::commit();
-
             return $comment;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Update Comment Failed: ' . $e->getMessage());
             return null;

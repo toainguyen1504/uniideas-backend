@@ -34,37 +34,7 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
      */
     public function create($data)
     {
-        try {
-            DB::beginTransaction();
-
-            $data['user_id'] = auth()->id();
-            $data['idea_id'] = Arr::get($data, 'idea_id');
-
-            // Lấy submission từ idea
-            $idea = \App\Models\Idea::findOrFail($data['idea_id']);
-            $submission = $idea->submission;
-
-            // Kiểm tra trạng thái comment
-            if (!$submission->status->canComment()) {
-                return response()->json([
-                    'message' => 'Comments are closed after Final Closure Date.'
-                ], 422);
-            }
-
-            // Tạo comment
-            $comment = $this->model->create($data);
-
-            // Dispatch notify job
-            NotifyCommentIdeaJob::dispatch($comment, $comment->idea);
-
-            DB::commit();
-            return $comment;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 422);
-        }
+         return Comment::create($data);
     }
 
     /**
@@ -72,35 +42,7 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
      */
     public function update($model, $data)
     {
-        try {
-            DB::beginTransaction();
-
-            $data['user_id'] = auth()->id();
-            $data['idea_id'] = $model->idea_id;
-
-            // Lấy submission từ idea
-            $submission = $model->idea->submission;
-
-            // Kiểm tra trạng thái READ-ONLY
-            if (!$submission->status->canBeModified()) {
-                return response()->json([
-                    'message' => 'Submission is read-only. Cannot update comment.'
-                ], 422);
-            }
-
-
-            $model->update($data);
-
-            NotifyCommentIdeaJob::dispatch($model, $model->idea);
-
-            DB::commit();
-            return $model;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 422);
-        }
+        return $comment->update($data);
     }
 
 
