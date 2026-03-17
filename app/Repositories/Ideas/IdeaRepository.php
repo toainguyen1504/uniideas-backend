@@ -141,39 +141,7 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
      */
     public function create($data): ?Idea
     {
-        $submission = Submission::findOrFail($data['submission_id']);
-        if (!$submission->canAcceptIdeas()) {
-
-            return null;
-        }
-
-        DB::beginTransaction();
-        try {
-            if (isset($data['title'])) {
-                $data['slug'] = Str::slug($data['title']);
-            }
-
-            $data['user_id'] = auth()->id();
-
-            $idea = $this->model->create($data);
-
-            if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
-                $idea->addMedia($data['file_path'])
-                    ->usingFileName($data['file_path']->getClientOriginalName())
-                    ->toMediaCollection($this->model::FILE_PATH_COLLECTION);
-
-                $idea->load('media');
-            }
-
-            NotifyIdeaModeratorsJob::dispatch($idea);
-
-            DB::commit();
-            return $idea;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            Log::error('Create Idea Failed: ' . $e->getMessage());
-            return null;
-        }
+        return Idea::create($data);
     }
 
 

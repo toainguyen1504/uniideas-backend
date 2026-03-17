@@ -39,6 +39,7 @@ class Submission extends Model
    */
   public function getStatusAttribute(): SubmissionStatus
   {
+
     if (now()->greaterThan($this->final_closure_date)) {
       return SubmissionStatus::FINALLY_CLOSED;
     }
@@ -90,6 +91,8 @@ class Submission extends Model
   {
     return $this->status->canBeModified();
   }
+
+
 
   /**
    * Get remaining days until closure
@@ -147,6 +150,4 @@ class Submission extends Model
   {
     return $this->scopeByStatus($query, SubmissionStatus::FINALLY_CLOSED);
   }
-
-  
 }

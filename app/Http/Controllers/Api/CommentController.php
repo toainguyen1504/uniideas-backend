@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Comment\IndexCommentRequest;
 use App\Http\Requests\Comment\StoreCommentRequest;
 use App\Http\Requests\Comment\UpdateCommentRequest;
+use App\Http\Resources\Api\CommentResource;
 use App\Models\Comment;
 use App\Repositories\Comment\CommentRepositoryInterface;
 use App\Services\CommentService;
@@ -41,11 +42,21 @@ class CommentController extends Controller
      */
     public function store(StoreCommentRequest $request)
     {
-        return $this->commentService->create($request->validated()) 
-            ? $this->okResponse([], 'Comment created successfully.')
-            : $this->errorResponse([], 'Failed to create comment.', 422);
-    }
+        $comment = $this->commentService->create($request->validated());
 
+        if (!$comment) {
+            return $this->errorResponse(
+                null,
+                'Failed to create comment.',
+                422
+            );
+        }
+
+        return $this->okResponse(
+            new CommentResource($comment),
+            'Comment created successfully.'
+        );
+    }
     /**
      * Update Comment
      * 
@@ -63,7 +74,7 @@ class CommentController extends Controller
      */
     public function update(UpdateCommentRequest $request, Comment $comment)
     {
-        return $this->commentService->update($comment, $request->validated()) 
+        return $this->commentService->update($comment, $request->validated())
             ? $this->okResponse([], 'Comment updated successfully.')
             : $this->errorResponse([], 'Failed to update comment.', 422);
     }

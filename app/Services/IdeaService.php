@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use App\Jobs\NotifyIdeaModeratorsJob;
 use App\Models\Idea;
+use App\Models\Submission;
 use App\Notifications\NewIdeaNotification;
 use App\Repositories\Ideas\IdeaRepositoryInterface;
 use Illuminate\Support\Facades\Notification;
@@ -31,108 +32,84 @@ class IdeaService
     /**
      * Override create method to return Idea
      */
-    public function create($data)
-    {
-        try {
-            DB::beginTransaction();
+   public function create(array $data): ?Idea
+{
+    $submission = Submission::findOrFail($data['submission_id']);
 
-            if (isset($data['title'])) {
-                $data['slug'] = Str::slug($data['title']);
-            }
+    if (!$submission->canAcceptIdeas()) {
+        return null;
+    }
 
-            $data['user_id'] = auth()->id();
+    DB::beginTransaction();
+    try {
+        $data['slug'] = Str::slug($data['title'] ?? '');
+        $data['user_id'] = auth()->id();
 
-            $idea = $this->ideaRepository->create($data);
-            if (!$idea) {
-                DB::rollBack();
-                return null;
-            }
-
-            if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
-                $idea->addMedia($data['file_path'])
-                    ->usingFileName($data['file_path']->getClientOriginalName())
-                    ->toMediaCollection($idea::FILE_PATH_COLLECTION);
-
-                $idea->load('media');
-            }
-
-            $qaCoordinators = $this->userRepository->getUsersByQACoordinatorRole();
-            $qaCoordinators = $qaCoordinators->reject(function ($user) {
-                return $user->id === auth()->id();
-            });
-
-            if ($qaCoordinators->isNotEmpty()) {
-                Notification::send(
-                    $qaCoordinators,
-                    new NewIdeaNotification(auth()->user(), $idea)
-                );
-            }
-
-            NotifyIdeaModeratorsJob::dispatch($idea);
-
-            DB::commit();
-            return $idea;
-        } catch (\Exception $e) {
+        $idea = $this->ideaRepository->create($data);
+        if (!$idea) {
             DB::rollBack();
-            Log::error('Create Idea Failed: ' . $e->getMessage());
             return null;
         }
+
+        if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
+            $idea->addMedia($data['file_path'])
+                ->usingFileName($data['file_path']->getClientOriginalName())
+                ->toMediaCollection(Idea::FILE_PATH_COLLECTION);
+            $idea->load('media');
+        }
+
+        NotifyIdeaModeratorsJob::dispatch($idea);
+
+        DB::commit();
+        return $idea;
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        Log::error('Create Idea Failed: ' . $e->getMessage());
+        return null;
     }
+}
+
+
 
     /**
      * Override update method to return Idea
      */
-    public function update(Idea $idea, array $data)
+    public function update($model, $data)
     {
-        $submission = $idea->submission;
+        $submission = $model->submission;
 
         if (!$submission->canBeModified()) {
-            return null; // chỉ trả về null
+            return null;
         }
-        try {
-            DB::beginTransaction();
 
+        DB::beginTransaction();
+        try {
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);
             }
 
-            if (isset($data['user_id']) && $data['user_id'] !== $idea->user_id) {
+            if (isset($data['user_id']) && $data['user_id'] !== $model->user_id) {
                 $data['user_id'] = auth()->id();
             }
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
-                $idea->clearMediaCollection($idea::FILE_PATH_COLLECTION);
-                $idea->addMedia($data['file_path'])
+                $model->clearMediaCollection($this->model::FILE_PATH_COLLECTION);
+                $model->addMedia($data['file_path'])
                     ->usingFileName($data['file_path']->getClientOriginalName())
-                    ->toMediaCollection($idea::FILE_PATH_COLLECTION);
-
-                $idea->load('media');
+                    ->toMediaCollection($this->model::FILE_PATH_COLLECTION);
+                $model->load('media');
             }
 
-            $idea->update($data);
+            $model->update($data);
 
-            DB::commit();            
-            return $idea;
-        } catch (\Exception $e) {
+            NotifyIdeaModeratorsJob::dispatch($model);
+
+            DB::commit();
+            return $model;
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
             return null;
-        }
-    }
-
-    public function destroy(Idea $idea): bool
-    {
-        try {
-            DB::beginTransaction();
-
-            $deleted = $this->ideaRepository->destroy($idea);
-
-            DB::commit();
-            return $deleted;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Delete Idea Failed: ' . $e->getMessage());
-            return false;
         }
     }
 }

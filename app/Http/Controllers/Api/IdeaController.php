@@ -11,6 +11,7 @@ use App\Http\Requests\Idea\UpdateIdeaRequest;
 use App\Http\Resources\Api\CommentResource;
 use App\Http\Resources\Api\IdeaResource;
 use App\Models\Idea;
+use App\Models\Submission;
 use App\Services\MailService;
 use App\Repositories\Comment\CommentRepositoryInterface;
 use App\Repositories\Ideas\IdeaRepositoryInterface;
@@ -18,6 +19,7 @@ use App\Repositories\React\ReactRepositoryInterface;
 use App\Repositories\View\ViewRepositoryInterface;
 use App\Services\IdeaService;
 use App\Services\ViewService;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @tags Ideas Management
@@ -86,24 +88,27 @@ class IdeaController extends Controller
      *
      * @param \App\Http\Requests\Idea\StoreIdeaRequest $request
      */
-    public function store(StoreIdeaRequest $request)
-    {
-        try {
-            $idea = $this->ideaService->create($request->validated());
 
-            if (!$idea) {
-                return response()->json([
-                    'message' => 'Ideas cannot be submitted after Closure Date.'
-                ], 422);
-            }
-            return $this->okResponse(
-                new IdeaResource($idea),
-                'Idea created successfully.'
-            );
-        } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 422);
-        }
+
+   public function store(StoreIdeaRequest $request)
+{
+    $idea = $this->ideaService->create($request->validated());
+
+    if (!$idea) {
+        return $this->errorResponse(
+            null,
+            'Ideas cannot be submitted after Closure Date.',
+            422
+        );
     }
+
+    return $this->okResponse(
+        new IdeaResource($idea),
+        'Idea created successfully.'
+    );
+}
+
+
 
 
     /**
@@ -166,16 +171,19 @@ class IdeaController extends Controller
         $updated = $this->ideaService->update($idea, $request->all());
 
         if (!$updated) {
-            return response()->json([
-                'message' => 'Submission is read-only. Cannot update idea.'
-            ], 422);
+            return $this->okResponse(
+                null,
+                'Submission is read-only. Cannot update idea.',
+                422
+            );
         }
 
-        return response()->json([
-            'message' => 'Idea updated successfully.',
-            'data' => new IdeaResource($updated)
-        ]);
+        return $this->okResponse(
+            new IdeaResource($updated),
+            'Idea updated successfully.'
+        );
     }
+
 
 
     /**
