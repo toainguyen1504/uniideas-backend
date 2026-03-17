@@ -118,8 +118,8 @@ class IdeaService
 
             $model->update($data);
 
-            DB::commit();
-            return $model;
+            DB::commit();            
+            return $idea;
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
