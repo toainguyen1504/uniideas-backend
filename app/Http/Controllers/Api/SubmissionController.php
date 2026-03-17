@@ -43,10 +43,8 @@ class SubmissionController extends Controller
      */
     public function index(Request $request)
     {
-        
         $submissions = $this->submissionRepository->serverPaginationFiltering($request->all());
        
-
         if (!$submissions) {
             return $this->errorResponse(
                 [],
@@ -54,10 +52,16 @@ class SubmissionController extends Controller
                 404
             );
         }
-        return $this->okResponse(
-            SubmissionResource::collection($submissions),
-            'submission list retrieved successfully. '
-        );
+
+        return $this->okResponse([
+            'submissions' => SubmissionResource::collection($submissions),
+            'pagination' => [
+                'current_page' => $submissions->currentPage(),
+                'last_page' => $submissions->lastPage(),
+                'per_page' => $submissions->perPage(),
+                'total' => $submissions->total(),
+            ],
+        ], 'submission list retrieved successfully.');
     }
 
 

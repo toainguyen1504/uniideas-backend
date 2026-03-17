@@ -30,23 +30,6 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
     }
 
     /**
-     * Override create method.
-     */
-    public function create($data)
-    {
-         return Comment::create($data);
-    }
-
-    /**
-     * Override update method.
-     */
-    public function update($model, $data)
-    {
-        return $comment->update($data);
-    }
-
-
-    /**
      * Get comments by Idea.
      */
     public function getCommentsByIdea(int $ideaId): Collection

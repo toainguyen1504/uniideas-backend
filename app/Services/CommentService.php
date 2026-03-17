@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enum\SubmissionStatus;
 use App\Repositories\User\UserRepositoryInterface;
 use App\Jobs\NotifyCommentIdeaJob;
 use App\Models\Comment;
@@ -12,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 use App\Models\Idea;
+use App\Repositories\Ideas\IdeaRepositoryInterface;
+use App\Repositories\Submission\SubmissionRepositoryInterface;
 
 class CommentService
 {
@@ -23,6 +26,8 @@ class CommentService
     public function __construct(
         protected UserRepositoryInterface $userRepository,
         protected CommentRepositoryInterface $commentRepository,
+        protected SubmissionRepositoryInterface $submissionRepository,
+        protected IdeaRepositoryInterface $ideaRepository,
     ) {
         //
     }
@@ -32,19 +37,25 @@ class CommentService
      */
     public function create(array $data): ?Comment
     {
-        $idea = Idea::findOrFail($data['idea_id']);
+        $idea = $this->ideaRepository->getIdeaById($data['idea_id']);
+        
         $submission = $idea->submission;
-
-        if (!$submission->status->canComment()) {
+        if ($submission->status !== SubmissionStatus::OPEN) {
             return null;
         }
 
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
+
             $data['user_id'] = auth()->id();
             $comment = $this->commentRepository->create($data);
 
-            NotifyCommentIdeaJob::dispatch($comment, $idea);
+            $ideaOwner = $comment->idea->user ?? null;
+
+            if ($ideaOwner && $ideaOwner->id !== auth()->id()) {
+                $ideaOwner->notify(new NewCommentIdeaNotification(auth()->user(), $comment, $comment->idea));
+                NotifyCommentIdeaJob::dispatch($comment, $comment->idea);
+            }
 
             DB::commit();
             return $comment;
@@ -61,17 +72,16 @@ class CommentService
     public function update(Comment $comment, array $data): ?Comment
     {
         $submission = $comment->idea->submission;
-
-        if (!$submission->status->canBeModified()) {
-            return null; // chặn khi read-only
+        if ($submission->status !== SubmissionStatus::OPEN) {
+            return null;
         }
 
-        DB::beginTransaction();
         try {
-            $data['user_id'] = auth()->id();
-            $this->commentRepository->update($comment, $data);
+            DB::beginTransaction();
 
-            NotifyCommentIdeaJob::dispatch($comment, $comment->idea);
+            $data['user_id'] = auth()->id();
+
+            $this->commentRepository->update($comment, $data);
 
             DB::commit();
             return $comment;

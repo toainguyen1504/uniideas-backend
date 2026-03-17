@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Acl\Acl;
+use App\Enum\SubmissionStatus;
 use App\Repositories\User\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -12,6 +13,7 @@ use App\Models\Idea;
 use App\Models\Submission;
 use App\Notifications\NewIdeaNotification;
 use App\Repositories\Ideas\IdeaRepositoryInterface;
+use App\Repositories\Submission\SubmissionRepositoryInterface;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 
@@ -21,10 +23,12 @@ class IdeaService
      * Summary of __construct
      *
      * @param UserRepositoryInterface $userRepository
+     * @param IdeaRepositoryInterface $ideaRepository
      */
     public function __construct(
         protected UserRepositoryInterface $userRepository,
         protected IdeaRepositoryInterface $ideaRepository,
+        protected SubmissionRepositoryInterface $submissionRepository,
     ) {
         //
     }
@@ -32,58 +36,70 @@ class IdeaService
     /**
      * Override create method to return Idea
      */
-   public function create(array $data): ?Idea
-{
-    $submission = Submission::findOrFail($data['submission_id']);
+    public function create(array $data): ?Idea
+    {
+        $submissionId = $data['submission_id'] ?? null;
+        $submission = $this->submissionRepository->getSubmissionWithStatus($submissionId);
 
-    if (!$submission->canAcceptIdeas()) {
-        return null;
-    }
-
-    DB::beginTransaction();
-    try {
-        $data['slug'] = Str::slug($data['title'] ?? '');
-        $data['user_id'] = auth()->id();
-
-        $idea = $this->ideaRepository->create($data);
-        if (!$idea) {
-            DB::rollBack();
+        if ($submission->status !== SubmissionStatus::OPEN) {
             return null;
         }
+        
+        try {
+            DB::beginTransaction();
 
-        if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
-            $idea->addMedia($data['file_path'])
-                ->usingFileName($data['file_path']->getClientOriginalName())
-                ->toMediaCollection(Idea::FILE_PATH_COLLECTION);
-            $idea->load('media');
+            $data['slug'] = Str::slug($data['title'] ?? '');
+            $data['user_id'] = auth()->id();
+
+            $idea = $this->ideaRepository->create($data);
+
+            if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
+                $idea->addMedia($data['file_path'])
+                    ->usingFileName($data['file_path']->getClientOriginalName())
+                    ->toMediaCollection(Idea::FILE_PATH_COLLECTION);
+                $idea->load('media');
+            }
+
+            $qaCoordinators = $this->userRepository->getUsersByQACoordinatorRole();
+            $qaCoordinators = $qaCoordinators->reject(function ($user) {
+                return $user->id === auth()->id();
+            });
+
+            if ($qaCoordinators->isNotEmpty()) {
+                Notification::send(
+                    $qaCoordinators, 
+                    new NewIdeaNotification(auth()->user(), $idea)
+                );
+            }
+
+            NotifyIdeaModeratorsJob::dispatch($idea);
+
+            DB::commit();
+
+            return $idea;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Create Idea Failed: ' . $e->getMessage());
+            return null;
         }
-
-        NotifyIdeaModeratorsJob::dispatch($idea);
-
-        DB::commit();
-        return $idea;
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        Log::error('Create Idea Failed: ' . $e->getMessage());
-        return null;
     }
-}
-
-
 
     /**
      * Override update method to return Idea
      */
     public function update($model, $data)
     {
-        $submission = $model->submission;
-
-        if (!$submission->canBeModified()) {
-            return null;
+        $submissionId = $data['submission_id'] ?? null;
+        if ($submissionId) {
+            $submission = $this->submissionRepository->getSubmissionWithStatus($submissionId);
+            if ($submission->status !== SubmissionStatus::OPEN) {
+                return null;
+            }
         }
-
-        DB::beginTransaction();
+        
         try {
+            DB::beginTransaction();
+            
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);
             }
@@ -102,11 +118,9 @@ class IdeaService
 
             $model->update($data);
 
-            NotifyIdeaModeratorsJob::dispatch($model);
-
             DB::commit();
             return $model;
-        } catch (\Throwable $e) {
+        } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
             return null;

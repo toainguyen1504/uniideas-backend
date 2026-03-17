@@ -13,7 +13,7 @@ use App\Acl\Acl;
  */
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
-    const ITEM_PER_PAGE = 20;
+    const ITEM_PER_PAGE = 5;
 
     /**
      * {@inheritdoc}

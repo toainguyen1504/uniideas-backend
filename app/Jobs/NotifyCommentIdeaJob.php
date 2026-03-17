@@ -34,7 +34,7 @@ class NotifyCommentIdeaJob implements ShouldQueue
 
         $content = [
             'title' => "New comment from {$comment->user->name} on your idea.",
-            'body' => "User {$comment->user->name} commented on your idea titled '{$idea->title}': '{$comment->content}'",
+            'body' => "User {$comment->user->name} commented on your idea title '{$idea->title}': '{$comment->content}'",
         ];
 
         $mailService->notifyIdeaAuthorNewComment($idea->id, [
