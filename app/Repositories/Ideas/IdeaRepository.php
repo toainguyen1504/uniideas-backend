@@ -119,71 +119,10 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     }
 
     /**
-     * Xóa idea
+     * Get idea by id
      */
-    public function destroy($model): bool
+    public function getIdeaById($ideaId)
     {
-
-        $idea = $model instanceof Idea ? $model : $this->find($model);
-
-        if (!$idea) return false;
-
-        $submission = $idea->submission;
-
-        if (!$submission->status->canBeModified()) {
-            return false;
-        }
-        return parent::destroy($idea);
-    }
-
-    /**
-     * Override create method
-     */
-    public function create($data): ?Idea
-    {
-        return Idea::create($data);
-    }
-
-
-    /**
-     * Override update method to return Idea
-     */
-    public function update($model, $data)
-    {
-        $submission = $model->submission;
-
-        if (!$submission->canBeModified()) {
-            return null;
-        }
-        DB::beginTransaction();
-        try {
-            if (isset($data['title'])) {
-                $data['slug'] = Str::slug($data['title']);
-            }
-
-            if (isset($data['user_id']) && $data['user_id'] !== $model->user_id) {
-                $data['user_id'] = auth()->id();
-            }
-
-            if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
-                $model->clearMediaCollection($this->model::FILE_PATH_COLLECTION);
-                $model->addMedia($data['file_path'])
-                    ->usingFileName($data['file_path']->getClientOriginalName())
-                    ->toMediaCollection($this->model::FILE_PATH_COLLECTION);
-                $model->load('media');
-            }
-
-            $model->update($data);
-
-            NotifyIdeaModeratorsJob::dispatch($model);
-
-            DB::commit();
-            return $model;
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 422);
-        }
+        return $this->model->findOrFail($ideaId);
     }
 }

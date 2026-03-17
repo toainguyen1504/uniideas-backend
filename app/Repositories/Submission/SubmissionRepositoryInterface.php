@@ -11,5 +11,9 @@ interface SubmissionRepositoryInterface extends RepositoryInterface
      * Get paginated submissions with filtering
      */
     public function serverPaginationFiltering(array $searchParams): LengthAwarePaginator;
-    
+
+    /**
+     * Get submission with status.
+     */
+    public function getSubmissionWithStatus($submissionId);
 }

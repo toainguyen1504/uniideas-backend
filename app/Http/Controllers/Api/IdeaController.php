@@ -64,13 +64,17 @@ class IdeaController extends Controller
      */
     public function index(Request $request)
     {
-
         $ideas = $this->ideaRepository->serverPaginationFiltering($request->all());
 
-
-        return $this->okResponse(
-            IdeaResource::collection($ideas),
-            'Idea list retrieved successfully.'
+        return $this->okResponse([
+            'data' => IdeaResource::collection($ideas),
+            'pagination' => [
+                'current_page' => $ideas->currentPage(),
+                'last_page' => $ideas->lastPage(),
+                'per_page' => $ideas->perPage(),
+                'total' => $ideas->total(),
+            ]
+            ], 'Idea list retrieved successfully.'
         );
     }
 
@@ -91,25 +95,22 @@ class IdeaController extends Controller
 
 
    public function store(StoreIdeaRequest $request)
-{
-    $idea = $this->ideaService->create($request->validated());
+    {
+        $idea = $this->ideaService->create($request->validated());
 
-    if (!$idea) {
-        return $this->errorResponse(
-            null,
-            'Ideas cannot be submitted after Closure Date.',
-            422
+        if (!$idea) {
+            return $this->errorResponse(
+                null,
+                'Ideas cannot be submitted after Closure Date.',
+                422
+            );
+        }
+
+        return $this->okResponse(
+            new IdeaResource($idea),
+            'Idea created successfully.'
         );
     }
-
-    return $this->okResponse(
-        new IdeaResource($idea),
-        'Idea created successfully.'
-    );
-}
-
-
-
 
     /**
      * Show Idea Detail
@@ -166,9 +167,9 @@ class IdeaController extends Controller
      * @param \App\Http\Requests\Idea\UpdateIdeaRequest $request
      * @param \App\Models\Idea $idea
      */
-    public function update(Request $request, Idea $idea)
+    public function update(UpdateIdeaRequest $request, Idea $idea)
     {
-        $updated = $this->ideaService->update($idea, $request->all());
+        $updated = $this->ideaService->update($idea, $request->validated());
 
         if (!$updated) {
             return $this->okResponse(
@@ -178,13 +179,11 @@ class IdeaController extends Controller
             );
         }
 
-        return $this->okResponse(
-            new IdeaResource($updated),
-            'Idea updated successfully.'
+        return $this->okResponse([
+            'data' => new IdeaResource($updated),
+            ], 'Idea updated successfully.'
         );
     }
-
-
 
     /**
      * Delete Idea
