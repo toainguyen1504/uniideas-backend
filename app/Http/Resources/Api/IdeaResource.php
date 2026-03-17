@@ -39,4 +39,16 @@ class IdeaResource extends JsonResource
             'updated_at'     => $this->updated_at?->toDateTimeString(),
         ];
     }
+
+    public function with(Request $request): array
+    {
+        return [
+            'meta' => [
+                'per_page' => $this->resource->perPage() ?? 5,
+                'current_page' => $this->resource->currentPage(),
+                'last_page' => $this->resource->lastPage(),
+                'total' => $this->resource->total(),
+            ],
+        ];
+    }
 }

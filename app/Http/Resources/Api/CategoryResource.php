@@ -7,7 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CategoryResource extends JsonResource
 {
-        /**
+    /**
      * Transform the resource into an array.
      *
      * @return array<string, mixed>
@@ -20,6 +20,18 @@ class CategoryResource extends JsonResource
             'status' => $this->status,
             'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at?->format('Y-m-d H:i:s'),
+        ];
+    }
+
+    public function with(Request $request): array
+    {
+        return [
+            'meta' => [
+                'per_page'     => $this->resource->perPage() ?? 5,
+                'current_page' => $this->resource->currentPage(),
+                'last_page'    => $this->resource->lastPage(),
+                'total'        => $this->resource->total(),
+            ],
         ];
     }
 }
