@@ -1,5 +1,11 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /
 
-    RewriteRule ^(.*)$ public/$1 [L]
+    # Nếu request là file hoặc thư mục thật thì trả về trực tiếp
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Còn lại thì chuyển vào public/index.php
+    RewriteRule ^ public/index.php [L]
 </IfModule>
