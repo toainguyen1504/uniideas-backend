@@ -77,7 +77,7 @@ class IdeaService
             DB::commit();
 
             return $idea;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Create Idea Failed: ' . $e->getMessage());
             return null;
@@ -120,7 +120,7 @@ class IdeaService
 
             DB::commit();            
             return $idea;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
             return null;
