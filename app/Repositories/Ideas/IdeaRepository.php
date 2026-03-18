@@ -3,6 +3,7 @@
 namespace App\Repositories\Ideas;
 
 use App\Models\Idea;
+use App\Models\Submission;
 use App\Repositories\BaseRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -10,6 +11,10 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use App\Jobs\NotifyIdeaModeratorsJob;
+use App\Notifications\NewIdeaNotification;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
 {
@@ -44,9 +49,10 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
         $query = $this->model->newQuery()->with(['user', 'category', 'submission']);
 
         if ($keyword = Arr::get($searchParams, 'search')) {
-            $query->where(fn($q) =>
+            $query->where(
+                fn($q) =>
                 $q->where('title', 'like', "%{$keyword}%")
-                  ->orWhere('content', 'like', "%{$keyword}%")
+                    ->orWhere('content', 'like', "%{$keyword}%")
             );
         }
 
@@ -113,79 +119,10 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     }
 
     /**
-     * Xóa idea
+     * Get idea by id
      */
-    public function deleteById(int $id): bool
+    public function getIdeaById($ideaId)
     {
-        $idea = $this->find($id);
-
-        if (! $idea) {
-            return false;
-        }
-
-        return $this->destroy($idea);
-    }
-
-    /**
-     * Override create method to return Idea
-     */
-    public function create($data)
-    {
-        try {
-            DB::beginTransaction();
-
-            if (isset($data['title'])) {
-                $data['slug'] = Str::slug($data['title']);
-            }
-
-            $idea = $this->model->create($data);
-
-            if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
-                $idea->addMedia($data['file_path'])
-                    ->usingFileName($data['file_path']->getClientOriginalName())
-                    ->toMediaCollection($this->model::FILE_PATH_COLLECTION);
-
-                $idea->load('media');
-            }
-
-            DB::commit();
-
-            return $idea;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return null;
-        }
-    }
-
-    /**
-     * Override update method to return Idea
-     */
-    public function update($model, $data)
-    {
-        try {
-            DB::beginTransaction();
-
-            if (isset($data['title'])) {
-                $data['slug'] = Str::slug($data['title']);
-            }
-
-            if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
-                $model->clearMediaCollection($this->model::FILE_PATH_COLLECTION);
-                $model->addMedia($data['file_path'])
-                    ->usingFileName($data['file_path']->getClientOriginalName())
-                    ->toMediaCollection($this->model::FILE_PATH_COLLECTION);
-
-                $model->load('media');
-            }
-
-            $model->update($data);
-
-            DB::commit();
-
-            return $model;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return null;
-        }
+        return $this->model->findOrFail($ideaId);
     }
 }

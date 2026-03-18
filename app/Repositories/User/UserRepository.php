@@ -6,13 +6,14 @@ use App\Models\User;
 use App\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
+use App\Acl\Acl;
 
 /**
  * The repository for User Model
  */
 class UserRepository extends BaseRepository implements UserRepositoryInterface
 {
-    const ITEM_PER_PAGE = 20;
+    const ITEM_PER_PAGE = 5;
 
     /**
      * {@inheritdoc}
@@ -69,5 +70,60 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         }
 
         return $query;
+    }
+
+    /**
+     * Get users by QA Coordinator role
+     */
+    public function getUsersByQACoordinatorRole()
+    {
+        return $this->model->whereHas('roles', function ($q) {
+            $q->where('name', Acl::ROLE_QA_COORDINATOR);
+        })->get();
+    }
+
+    /**
+     * Get notifications of user.
+     */
+    public function getUserNotifications($model, bool $unreadOnly = false, int $perPage = 20): LengthAwarePaginator
+    {
+        $query = $model->notifications();
+
+        if ($unreadOnly) {
+            $query = $model->unreadNotifications();
+        }
+
+        return $query->paginate($perPage);
+    }
+
+    /**
+     * Get count of unread notifications of user.
+     */
+    public function getUnreadCount($model): int
+    {
+        return $model->unreadNotifications()->count();
+    }
+
+    /**
+     * Mark a notification as read for the user.
+     */
+    public function markAsRead($model, string $notificationId): bool
+    {
+        $notification = $model->notifications()->find($notificationId);
+
+        if ($notification) {
+            $notification->markAsRead();
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Mark all notifications as read for the user.
+     */
+    public function markAllAsRead($model): void
+    {
+        $model->unreadNotifications->markAsRead();
     }
 }

@@ -25,7 +25,7 @@ class SubmissionController extends Controller
         $this->middleware('permission:' . Acl::PERMISSION_SUBMISSION_LIST)->only('index', 'show');
         $this->middleware('permission:' . Acl::PERMISSION_SUBMISSION_ADD)->only('store');
         $this->middleware('permission:' . Acl::PERMISSION_SUBMISSION_EDIT)->only('update');
-        $this->middleware('permission:' . Acl::PERMISSION_SUBMISSION_DELETE)->only('destroy'); 
+        $this->middleware('permission:' . Acl::PERMISSION_SUBMISSION_DELETE)->only('destroy');
     }
 
     /**
@@ -43,9 +43,8 @@ class SubmissionController extends Controller
      */
     public function index(Request $request)
     {
-
         $submissions = $this->submissionRepository->serverPaginationFiltering($request->all());
-
+       
         if (!$submissions) {
             return $this->errorResponse(
                 [],
@@ -53,11 +52,17 @@ class SubmissionController extends Controller
                 404
             );
         }
-            return $this->okResponse(
-                SubmissionResource::collection($submissions),
-              'submission list retrieved successfully. '
-            );
-        }
+
+        return $this->okResponse([
+            'submissions' => SubmissionResource::collection($submissions),
+            'pagination' => [
+                'current_page' => $submissions->currentPage(),
+                'last_page' => $submissions->lastPage(),
+                'per_page' => $submissions->perPage(),
+                'total' => $submissions->total(),
+            ],
+        ], 'submission list retrieved successfully.');
+    }
 
 
     /**
@@ -72,7 +77,7 @@ class SubmissionController extends Controller
     public function store(StoreSubmissionRequest $request)
     {
         $submissions = $this->submissionRepository->create($request->validated());
-        
+
         return $submissions
             ? $this->okResponse(new SubmissionResource($submissions), 'submission created successfully.')
             : $this->errorResponse([], 'Failed to create submission.', 422);
@@ -85,7 +90,7 @@ class SubmissionController extends Controller
      *   data: \App\Http\Resources\Api\SubmissionResource,
      * }
      */
-      public function show(Submission $submission)
+    public function show(Submission $submission)
     {
         return $this->okResponse(new SubmissionResource($submission), 'submission details retrieved successfully.');
     }
@@ -98,10 +103,10 @@ class SubmissionController extends Controller
      *   data: \App\Http\Resources\Api\SubmissionResource,
      * }
      */
-   public function update(UpdateSubmissionRequest $request, Submission $submission)
+    public function update(UpdateSubmissionRequest $request, Submission $submission)
     {
         $submission = $this->submissionRepository->update($submission, $request->validated());
-        
+
         return $submission
             ? $this->okResponse(new SubmissionResource($submission), 'submission updated successfully.')
             : $this->errorResponse([], 'Failed to submission user.', 422);
@@ -114,7 +119,7 @@ class SubmissionController extends Controller
      *   data: array{},
      * }
      */
-       public function destroy(Submission $submission)
+    public function destroy(Submission $submission)
     {
         $deleted = $this->submissionRepository->destroy($submission);
 

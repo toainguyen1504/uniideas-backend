@@ -126,4 +126,7 @@ return [
         'table' => 'failed_jobs',
     ],
 
+    'names' => [
+        'email' => 'send-email',
+    ],
 ];

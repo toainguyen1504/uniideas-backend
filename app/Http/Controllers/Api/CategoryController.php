@@ -47,18 +47,23 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $categories = $this->categoryRepository->serverPaginationFiltering($request->all());
-        if (!$categories || $categories->isEmpty()) {
-            return $this->errorResponse(
-                [],
-                'No categories found.',
-                404
-            );
-        }
+            if (!$categories || $categories->isEmpty()) {
+                return $this->errorResponse(
+                    [],
+                    'No categories found.',
+                    404
+                );
+            }
 
-        return $this->okResponse(
-            CategoryResource::collection($categories),
-            'Category list retrieved successfully.'
-        );
+        return $this->okResponse([
+            'categories' => CategoryResource::collection($categories),
+            'pagination' => [
+                'current_page' => $categories->currentPage(),
+                'last_page' => $categories->lastPage(),
+                'per_page' => $categories->perPage(),
+                'total' => $categories->total(),
+            ],
+        ], 'Category list retrieved successfully.');
     }
 
     /**
@@ -94,6 +99,14 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
+        if (!$category) {
+            return $this->errorResponse(
+                [],
+                'Category not found.',
+                404
+            );
+        }
+
         return $this->okResponse(new CategoryResource($category), 'Category details retrieved successfully.');
     }
 
@@ -126,8 +139,16 @@ class CategoryController extends Controller
      *   data: array{},
      * }
      */
-   public function destroy(Category $category)
+    public function destroy(Category $category)
     {
+        if (!$category) {
+            return $this->errorResponse(
+                [],
+                'Category not found.',
+                404
+            );
+        }
+
         $deleted = $this->categoryRepository->destroy($category);
 
         return $deleted

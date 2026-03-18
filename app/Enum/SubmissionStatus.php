@@ -2,58 +2,24 @@
 
 namespace App\Enum;
 
-enum SubmissionStatus: string
+use App\Traits\EnumOptions;
+use App\Traits\EnumValues;
+
+enum SubmissionStatus: int
 {
-    case OPEN = 'open';
-    case CLOSED = 'closed';
-    case FINALLY_CLOSED = 'finally_closed';
+    use EnumValues, EnumOptions;
 
-    /**
-     * Get all status values as array
-     */
-    public static function values(): array
-    {
-        return array_column(self::cases(), 'value');
-    }
+    case OPEN = 1;
+    case CLOSED = 2;
+    case FINALLY_CLOSED = 3;
 
-    /**
-     * Get all status cases
-     */
-    public static function casesArray(): array
+    
+    public function getName(): string
     {
-        return [
-            self::OPEN,
-            self::CLOSED,
-            self::FINALLY_CLOSED,
-        ];
-    }
-
-    /**
-     * Check if status allows adding new ideas
-     */
-    public function canAcceptIdeas(): bool
-    {
-        return $this === self::OPEN;
-    }
-
-    /**
-     * Check if submission can be modified
-     */
-    public function canBeModified(): bool
-    {
-        return $this !== self::FINALLY_CLOSED;
-    }
-
-    /**
-     * Get description for status
-     */
-    public function description(): string
-    {
-        return match($this) {
-            self::OPEN => 'Submission is open for new ideas',
-            self::CLOSED => 'Submission is closed for new ideas but still active',
-            self::FINALLY_CLOSED => 'Submission is completely closed',
+        return match ($this) {
+            self::OPEN => __('Open'),
+            self::CLOSED => __('Closed'),
+            self::FINALLY_CLOSED => __('Finally Closed'),
         };
     }
-    
 }

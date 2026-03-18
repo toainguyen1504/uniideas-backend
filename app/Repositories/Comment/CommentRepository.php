@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Comment;
 
+use App\Jobs\NotifyCommentIdeaJob;
 use App\Models\Comment;
 use App\Repositories\BaseRepository;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,49 +27,6 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
     {
         $this->model = $model;
         parent::__construct($model);
-    }
-
-    /**
-     * Override create method.
-     */
-    public function create($data)
-    {
-        try {
-            DB::beginTransaction();
-
-            $data['user_id'] = auth()->id();
-            $data['idea_id'] = Arr::get($data, 'idea_id');
-
-            $react = $this->model->create($data);
-
-            DB::commit();
-
-            return $react;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return null;
-        }
-    }
-    /**
-     * Override update method.
-     */
-    public function update($model, $data)
-    {
-        try {
-            DB::beginTransaction();
-
-            $data['user_id'] = auth()->id();
-            $data['idea_id'] = $model->idea_id;
-
-            $model->update($data);
-
-            DB::commit();
-
-            return $model;
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return null;
-        }
     }
 
     /**
