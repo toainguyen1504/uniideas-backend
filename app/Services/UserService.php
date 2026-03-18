@@ -55,7 +55,7 @@ class UserService
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return null;
         }
@@ -96,7 +96,7 @@ class UserService
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             return null;
         }
