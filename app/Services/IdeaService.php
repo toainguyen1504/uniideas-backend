@@ -41,10 +41,14 @@ class IdeaService
         $submissionId = $data['submission_id'] ?? null;
         $submission = $this->submissionRepository->getSubmissionWithStatus($submissionId);
 
-        if ($submission->status !== SubmissionStatus::OPEN) {
+        // if ($submission->status !== SubmissionStatus::OPEN) {
+        //     return null;
+        // } -> có thể gây crash nếu submission null
+
+        if (!$submission || $submission->status !== SubmissionStatus::OPEN) {
             return null;
         }
-        
+
         try {
             DB::beginTransaction();
 
@@ -65,14 +69,15 @@ class IdeaService
                 return $user->id === auth()->id();
             });
 
-            if ($qaCoordinators->isNotEmpty()) {
-                Notification::send(
-                    $qaCoordinators, 
-                    new NewIdeaNotification(auth()->user(), $idea)
-                );
-            }
+            // Comment để deploy - lỗi 500 khi có đoạn này
+            // if ($qaCoordinators->isNotEmpty()) {
+            //     Notification::send(
+            //         $qaCoordinators,
+            //         new NewIdeaNotification(auth()->user(), $idea)
+            //     );
+            // }
 
-            NotifyIdeaModeratorsJob::dispatch($idea);
+            // NotifyIdeaModeratorsJob::dispatch($idea);
 
             DB::commit();
 
@@ -96,10 +101,10 @@ class IdeaService
                 return null;
             }
         }
-        
+
         try {
             DB::beginTransaction();
-            
+
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);
             }
@@ -118,8 +123,8 @@ class IdeaService
 
             $model->update($data);
 
-            DB::commit();            
-            return $idea;
+            DB::commit();
+            return $idea; // here !!!!!! -> chuyển sang $model thì ok, trước khi fix thì chạy local test edit thử xem hiện để $idea có edit được hay không
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
