@@ -16,6 +16,8 @@ use App\Repositories\React\ReactRepository;
 use App\Repositories\React\ReactRepositoryInterface;
 use App\Repositories\Role\RoleRepository;
 use App\Repositories\Role\RoleRepositoryInterface;
+use App\Repositories\Statistics\StatisticsRepository;
+use App\Repositories\Statistics\StatisticsRepositoryInterface;
 use App\Repositories\Submission\SubmissionRepository;
 use App\Repositories\Submission\SubmissionRepositoryInterface;
 use App\Repositories\User\UserRepository;
@@ -43,6 +45,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->singleton(CommentRepositoryInterface::class, CommentRepository::class);
         $this->app->singleton(ViewRepositoryInterface::class, ViewRepository::class);
         $this->app->singleton(NotificationRepositoryInterface::class, NotificationRepository::class);
+        $this->app->singleton(StatisticsRepositoryInterface::class,StatisticsRepository::class);
     }
 
     /**
