@@ -112,4 +112,39 @@ class CommentController extends Controller
             ? $this->okResponse([], 'Comment deleted successfully.')
             : $this->errorResponse([], 'Failed to delete comment.', 422);
     }
+
+    /**
+     * List Comments
+     *
+     * Get a paginated list of comments with filter.
+     *
+     * @authenticated
+     *
+     * @response array{
+     *    message: string,
+     *    data: array{},
+     *    pagination: array{}
+     * }
+     *
+     * @param \Illuminate\Http\Request $request
+     */
+    public function index(Request $request)
+    {
+        $filter = $request->query('filter', 'latest');
+
+        $comments = $this->commentRepository->serverPaginationFiltering([
+            'filter' => $filter,
+            'per_page' => 5
+        ]);
+
+        return $this->okResponse([
+            'data' => CommentResource::collection($comments),
+            'pagination' => [
+                'current_page' => $comments->currentPage(),
+                'last_page'    => $comments->lastPage(),
+                'per_page'     => $comments->perPage(),
+                'total'        => $comments->total(),
+            ]
+        ], 'Comment list retrieved successfully.');
+    }
 }

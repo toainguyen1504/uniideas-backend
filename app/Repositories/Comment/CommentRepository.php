@@ -44,4 +44,17 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
     {
         return $this->model->where('idea_id', $ideaId)->count();
     }
+
+    public function serverPaginationFiltering(array $filters)
+    {
+        $query = Comment::query()->with('user');
+
+        if (($filters['filter'] ?? 'latest') === 'latest') {
+            $query->orderByDesc('created_at');
+        }
+
+        $perPage = $filters['per_page'] ?? 5;
+
+        return $query->paginate($perPage);
+    }
 }

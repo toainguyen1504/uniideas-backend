@@ -44,7 +44,7 @@ class IdeaService
         if ($submission->status !== SubmissionStatus::OPEN) {
             return null;
         }
-        
+
         try {
             DB::beginTransaction();
 
@@ -67,7 +67,7 @@ class IdeaService
 
             if ($qaCoordinators->isNotEmpty()) {
                 Notification::send(
-                    $qaCoordinators, 
+                    $qaCoordinators,
                     new NewIdeaNotification(auth()->user(), $idea)
                 );
             }
@@ -96,10 +96,10 @@ class IdeaService
                 return null;
             }
         }
-        
+
         try {
             DB::beginTransaction();
-            
+
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);
             }
@@ -118,12 +118,17 @@ class IdeaService
 
             $model->update($data);
 
-            DB::commit();            
+            DB::commit();
             return $model;
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
             return null;
         }
+    }
+    public function listIdeas(array $filters)
+    {
+        // Có thể thêm logic nghiệp vụ ở đây nếu cần
+        return $this->ideaRepository->serverPaginationFiltering($filters);
     }
 }
