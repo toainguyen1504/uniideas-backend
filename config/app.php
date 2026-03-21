@@ -142,6 +142,19 @@ return [
          */
         App\Providers\AppServiceProvider::class,
         App\Providers\RepositoryServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
     ])->toArray(),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Class Aliases
+    |--------------------------------------------------------------------------
+    |
+    | This array of class aliases will be registered when this application.
+    |
+    */
+    'aliases' => [
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
+    ],
 
 ];
