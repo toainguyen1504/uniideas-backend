@@ -16,6 +16,7 @@ use App\Repositories\Ideas\IdeaRepositoryInterface;
 use App\Repositories\Submission\SubmissionRepositoryInterface;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Arr;
 
 class IdeaService
 {
@@ -50,6 +51,7 @@ class IdeaService
 
             $data['slug'] = Str::slug($data['title'] ?? '');
             $data['user_id'] = auth()->id();
+            $data['terms_conditions'] = Arr::get($data, 'terms_conditions', false);
 
             $idea = $this->ideaRepository->create($data);
 
@@ -108,6 +110,10 @@ class IdeaService
                 $data['user_id'] = auth()->id();
             }
 
+            if (isset($data['terms_conditions'])) {
+                $data['terms_conditions'] = (bool) $data['terms_conditions'];
+            }
+
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
                 $model->clearMediaCollection($this->model::FILE_PATH_COLLECTION);
                 $model->addMedia($data['file_path'])
@@ -119,7 +125,7 @@ class IdeaService
             $model->update($data);
 
             DB::commit();            
-            return $idea;
+            return $model;
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());

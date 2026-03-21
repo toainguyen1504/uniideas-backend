@@ -28,6 +28,7 @@ class Idea extends Model implements HasMedia
         'submission_id',
         'is_featured', 
         'intro', 
+        'terms_conditions',
     ];
 
     protected $casts = [
@@ -36,6 +37,7 @@ class Idea extends Model implements HasMedia
         'total_views'    => 'integer',
         'total_comments' => 'integer',
         'is_featured' => 'boolean',
+        'terms_conditions' => 'boolean',
     ];
 
     protected $with = ['media'];
