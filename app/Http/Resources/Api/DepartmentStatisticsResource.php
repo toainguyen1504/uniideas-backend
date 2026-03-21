@@ -14,6 +14,7 @@ class DepartmentStatisticsResource extends JsonResource
             'department_name' => $this->department_name,
             'ideas_count'     => $this->ideas_count,
             'likes_count'     => $this->likes_count,
+            'dislikes_count' => $this->dislikes_count,
             'comments_count'  => $this->comments_count,
         ];
     }
