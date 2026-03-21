@@ -92,8 +92,6 @@ class IdeaController extends Controller
      *
      * @param \App\Http\Requests\Idea\StoreIdeaRequest $request
      */
-
-
    public function store(StoreIdeaRequest $request)
     {
         $idea = $this->ideaService->create($request->validated());

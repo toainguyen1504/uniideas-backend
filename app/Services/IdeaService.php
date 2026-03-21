@@ -126,4 +126,17 @@ class IdeaService
             return null;
         }
     }
+
+    /**
+     * Get top 3 ideas have is_featured = true in a submission and have most court likes.
+     */
+    public function getTopFeaturedIdeas($submissionId, int $limit = 3)
+    {
+        $submission = $this->submissionRepository->find($submissionId);
+        if (! $submission || ! $submission->is_closed) {
+            return null;
+        }
+
+        return $this->ideaRepository->getTopFeaturedIdeas($submissionId, $limit);
+    }
 }

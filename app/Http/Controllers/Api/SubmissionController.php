@@ -11,6 +11,11 @@ use App\Http\Resources\Api\SubmissionResource;
 use App\Models\Submission;
 use App\Repositories\Submission\SubmissionRepositoryInterface;
 use App\Acl\Acl;
+use App\Http\Resources\Api\CommentResource;
+use App\Http\Resources\Api\IdeaResource;
+use App\Repositories\Comment\CommentRepositoryInterface;
+use App\Repositories\Ideas\IdeaRepositoryInterface;
+use App\Repositories\React\ReactRepositoryInterface;
 
 /**
  * @tags Submissions Management
@@ -21,6 +26,9 @@ class SubmissionController extends Controller
 
     public function __construct(
         protected SubmissionRepositoryInterface $submissionRepository,
+        protected IdeaRepositoryInterface $ideaRepository,
+        protected CommentRepositoryInterface $commentRepository,
+        protected ReactRepositoryInterface $reactRepository,
     ) {
         $this->middleware('permission:' . Acl::PERMISSION_SUBMISSION_LIST)->only('index', 'show');
         $this->middleware('permission:' . Acl::PERMISSION_SUBMISSION_ADD)->only('store');
@@ -126,5 +134,38 @@ class SubmissionController extends Controller
         return $deleted
             ? $this->okResponse([], 'submission deleted successfully.')
             : $this->errorResponse([], 'Failed to delete submission.', 422);
+    }
+
+    /**
+     * Get featured ideas
+     * 
+     * Get top 3 ideas have is_featured = true in a submission and have most court likes.
+     * 
+     * @authenticated
+     * 
+     * @response array{
+     *     message: string,
+     *    data: array<\App\Http\Resources\Api\IdeaResource>,
+     * }
+     * @param int $submissionId
+     * 
+     */
+    public function ideasIsFeatured($submissionId)
+    {
+        $submission = $this->submissionRepository->find($submissionId);
+        if (!$submission) {
+            return $this->errorResponse(null, 'Submission not found.', 404);
+        }
+
+        if ($submission->is_closed) {
+            return $this->errorResponse(null, 'Submission was closed.', 422);
+        }
+
+        $ideas = $this->ideaRepository->getTopFeaturedIdeas($submissionId);
+
+        return $this->okResponse(
+            IdeaResource::collection($ideas),
+            'Featured ideas retrieved successfully.'
+        );
     }
 }
