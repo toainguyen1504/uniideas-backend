@@ -67,14 +67,14 @@ class IdeaService
                 return $user->id === auth()->id();
             });
 
-            if ($qaCoordinators->isNotEmpty()) {
-                Notification::send(
-                    $qaCoordinators, 
-                    new NewIdeaNotification(auth()->user(), $idea)
-                );
-            }
+            // if ($qaCoordinators->isNotEmpty()) {
+            //     Notification::send(
+            //         $qaCoordinators, 
+            //         new NewIdeaNotification(auth()->user(), $idea)
+            //     );
+            // }
 
-            NotifyIdeaModeratorsJob::dispatch($idea);
+            // NotifyIdeaModeratorsJob::dispatch($idea);
 
             DB::commit();
 
