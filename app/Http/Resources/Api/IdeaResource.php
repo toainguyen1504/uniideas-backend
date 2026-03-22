@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Enum\IdeaStatus;
 use App\Enum\AnonymousEnum;
+use Illuminate\Support\Str;
 
 class IdeaResource extends JsonResource
 {
@@ -26,12 +27,15 @@ class IdeaResource extends JsonResource
             'status' => $this->status instanceof Ideastatus ?
                 $this->status?->value
                 : Ideastatus::PENDING->value,
+            'status_name' => __(Str::title($this->status->name)),
             'is_anonymous' => $this->is_anonymous instanceof AnonymousEnum
                 ? $this->is_anonymous->value
                 : AnonymousEnum::NOT_ANONYMOUS->value,
+            'is_anonymous_name' => __(Str::title(str_replace('_', ' ', $this->is_anonymous->name))),
             'is_featured' => (bool) $this->is_featured,
             'total_views'    => $this->total_views,
             'total_comments' => $this->total_comments,
+            'terms_conditions' => (bool) $this->terms_conditions,
             'user'           => UserResource::make($this->whenLoaded('user', $this->user)),
             'category'       => CategoryResource::make($this->whenLoaded('category', $this->category)),
             'submission'     => SubmissionResource::make($this->whenLoaded('submission', $this->submission)),

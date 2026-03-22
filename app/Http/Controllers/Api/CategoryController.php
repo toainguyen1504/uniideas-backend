@@ -11,6 +11,7 @@ use App\Http\Resources\Api\CategoryResource;
 use App\Models\Category;
 use App\Repositories\Category\CategoryRepositoryInterface;
 use App\Acl\Acl;
+use App\Services\CategoryService;
 
 /**
  * @tags Categories Management
@@ -21,6 +22,7 @@ class CategoryController extends Controller
 
     public function __construct(
         protected CategoryRepositoryInterface $categoryRepository,
+        protected CategoryService $categoryService,
     ) {
         $this->middleware('permission:' . Acl::PERMISSION_CATEGORY_LIST)->only('index', 'show');
         $this->middleware('permission:' . Acl::PERMISSION_CATEGORY_ADD)->only('store');
@@ -149,7 +151,7 @@ class CategoryController extends Controller
             );
         }
 
-        $deleted = $this->categoryRepository->destroy($category);
+        $deleted = $this->categoryService->destroy($category);
 
         return $deleted
             ? $this->okResponse([], 'Category deleted successfully.')

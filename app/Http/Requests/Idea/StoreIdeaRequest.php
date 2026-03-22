@@ -57,7 +57,10 @@ class StoreIdeaRequest extends FormRequest
                 'nullable',
                 'string'
             ],
-
+            'terms_conditions' => [
+                'required',
+                'boolean',
+            ],
         ];
     }
 }

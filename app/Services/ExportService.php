@@ -25,7 +25,7 @@ class ExportService
     public function exportData($data, $headings, $filename) {
         try {
             $export = Excel::download(new DynamicExport($data, $headings), $filename);
-            Log::info('Export successful: ' . $export->getFile()->getRealPath());
+            // Log::info('Export successful: ' . $export->getFile()->getRealPath());
             Log::info('Export data details: ' . json_encode($data) . ', Headings: ' . json_encode($headings) . ', Filename: ' . $filename);
 
             return $export;

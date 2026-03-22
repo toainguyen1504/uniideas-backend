@@ -3,11 +3,14 @@
 namespace App\Repositories\Category;
 
 use App\Models\Category;
+use App\Models\Idea;
 use App\Repositories\BaseRepository;
 use App\Enum\CategoryStatus;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CategoryRepository extends BaseRepository implements CategoryRepositoryInterface
 {
