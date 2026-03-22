@@ -49,12 +49,23 @@ class ExportController extends Controller
             });
 
         $headings = [
-            'Title', 'Slug', 'Content', 'Status', 
-            'Anonymous', 'Views', 'Comments', 
-            'User', 'Category', 'Submission'
+            'Idea Title',
+            'Slug',
+            'Content',
+            'Status',
+            'Anonymous',
+            'Views',
+            'Comments',
+            'Author',
+            'Category',
+            'Submission',
         ];
 
-        $filename = 'ideas-' . Str::slug($submission->name) . '-' . now()->format('YmdHis') . '.xlsx';
+        $filename = sprintf(
+            'submission-%s-ideas-%s.xlsx',
+            Str::slug($submission->name),
+            now()->format('Y-m-d_H-i-s')
+        );
 
         return $this->exportService->exportData($ideas, $headings, $filename);
     }
