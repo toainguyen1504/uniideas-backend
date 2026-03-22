@@ -24,10 +24,6 @@ class UpdateIdeaRequest extends FormRequest
                 'string',
                 'max:255',
             ],
-            'content' => [
-                'required',
-                'string',
-            ],
             'file_path' => [
                 'nullable',
             ],
