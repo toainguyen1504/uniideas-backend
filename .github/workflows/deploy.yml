@@ -1,4 +1,4 @@
-name: Deploy Backend to InterData Hosting 21-03-2026
+name: Deploy Backend to InterData Hosting 22-03-2026
 
 on:
   workflow_dispatch:
