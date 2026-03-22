@@ -5,13 +5,13 @@ namespace App\Enum;
 use App\Traits\EnumOptions;
 use App\Traits\EnumValues;
 
-enum IdeaStatus: string
+enum IdeaStatus: int
 {
     use EnumValues, EnumOptions;
 
-    case PENDING  = 'pending';
-    case APPROVED = 'approved';
-    case REJECTED = 'rejected';
+    case PENDING  = 1;
+    case APPROVED = 2;
+    case REJECTED = 3;
 
     public function getName(): string
     {
