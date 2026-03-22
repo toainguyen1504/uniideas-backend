@@ -32,11 +32,31 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     {
         $limit = Arr::get($searchParams, 'limit', self::ITEM_PER_PAGE);
 
-        $query = $this->applyFilters($searchParams)
-            ->orderBy(
+        $query = Idea::query()->with('user');
+
+        // Xử lý filter
+        switch (Arr::get($searchParams, 'filter', 'latest')) {
+            case 'popular':
+                $query->withCount('reacts')->orderByDesc('reacts_count');
+                break;
+
+            case 'viewed':
+                $query->orderByDesc('total_views');
+                break;
+
+            case 'latest':
+            default:
+                $query->orderByDesc('created_at');
+                break;
+        }
+
+       
+        if (Arr::has($searchParams, 'sort_by')) {
+            $query->orderBy(
                 Arr::get($searchParams, 'sort_by', 'created_at'),
                 Arr::get($searchParams, 'sort_order', 'desc')
             );
+        }
 
         return $query->paginate($limit);
     }
