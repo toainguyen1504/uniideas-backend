@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Acl\Acl;
+use App\Enum\ReactEnum;
 use App\Enum\SubmissionStatus;
 use App\Repositories\User\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,8 @@ use App\Repositories\Submission\SubmissionRepositoryInterface;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Arr;
+
+
 
 class IdeaService
 {
@@ -45,7 +48,7 @@ class IdeaService
         if ($submission->status !== SubmissionStatus::OPEN) {
             return null;
         }
-        
+
         try {
             DB::beginTransaction();
 
@@ -69,7 +72,7 @@ class IdeaService
 
             if ($qaCoordinators->isNotEmpty()) {
                 Notification::send(
-                    $qaCoordinators, 
+                    $qaCoordinators,
                     new NewIdeaNotification(auth()->user(), $idea)
                 );
             }
@@ -98,10 +101,10 @@ class IdeaService
                 return null;
             }
         }
-        
+
         try {
             DB::beginTransaction();
-            
+
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);
             }
@@ -124,12 +127,46 @@ class IdeaService
 
             $model->update($data);
 
-            DB::commit();            
+            DB::commit();
             return $model;
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
             return null;
         }
+    }
+
+    public function getIdeasByFilter(string $filter)
+    {
+        $query = Idea::withCount([
+            'reacts as likes_count' => fn($q) => $q->where('react', ReactEnum::LIKE),
+            'reacts as dislikes_count' => fn($q) => $q->where('react', ReactEnum::DISLIKE),
+            'comments as comments_count'
+        ]);
+
+        // thêm field score sau khi withCount đã tạo likes_count/dislikes_count
+   $query = Idea::withCount([
+    'reacts as likes_count' => fn($q) => $q->where('react', ReactEnum::LIKE),
+    'reacts as dislikes_count' => fn($q) => $q->where('react', ReactEnum::DISLIKE),
+    'comments as comments_count'
+]);
+
+switch ($filter) {
+    case 'popular':
+        $query->orderByRaw('likes_count - dislikes_count DESC')
+              ->orderByDesc('views')
+              ->orderByDesc('created_at');
+        break;
+    case 'viewed':
+        $query->orderByDesc('views')
+              ->orderByRaw('likes_count - dislikes_count DESC')
+              ->orderByDesc('created_at');
+        break;
+    case 'latest':
+        $query->orderByDesc('created_at');
+        break;
+}
+
+        return $query->paginate(5);
     }
 }

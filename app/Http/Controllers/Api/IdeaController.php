@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\Idea\StoreIdeaRequest;
 use App\Http\Requests\Idea\UpdateIdeaRequest;
 use App\Http\Resources\Api\CommentResource;
+use App\Http\Resources\Api\IdeaRankingResource;
 use App\Http\Resources\Api\IdeaResource;
 use App\Models\Idea;
 use App\Models\Submission;
@@ -66,15 +67,17 @@ class IdeaController extends Controller
     {
         $ideas = $this->ideaRepository->serverPaginationFiltering($request->all());
 
-        return $this->okResponse([
-            'data' => IdeaResource::collection($ideas),
-            'pagination' => [
-                'current_page' => $ideas->currentPage(),
-                'last_page' => $ideas->lastPage(),
-                'per_page' => $ideas->perPage(),
-                'total' => $ideas->total(),
-            ]
-            ], 'Idea list retrieved successfully.'
+        return $this->okResponse(
+            [
+                'data' => IdeaResource::collection($ideas),
+                'pagination' => [
+                    'current_page' => $ideas->currentPage(),
+                    'last_page' => $ideas->lastPage(),
+                    'per_page' => $ideas->perPage(),
+                    'total' => $ideas->total(),
+                ]
+            ],
+            'Idea list retrieved successfully.'
         );
     }
 
@@ -94,7 +97,7 @@ class IdeaController extends Controller
      */
 
 
-   public function store(StoreIdeaRequest $request)
+    public function store(StoreIdeaRequest $request)
     {
         $idea = $this->ideaService->create($request->validated());
 
@@ -179,9 +182,11 @@ class IdeaController extends Controller
             );
         }
 
-        return $this->okResponse([
-            'data' => new IdeaResource($updated),
-            ], 'Idea updated successfully.'
+        return $this->okResponse(
+            [
+                'data' => new IdeaResource($updated),
+            ],
+            'Idea updated successfully.'
         );
     }
 
@@ -206,5 +211,38 @@ class IdeaController extends Controller
         return $deleted
             ? $this->okResponse([], 'Idea deleted successfully.')
             : $this->errorResponse([], 'Failed to delete idea.', 422);
+    }
+
+    /**
+     * List Ideas by Filter
+     *
+     * Retrieve a paginated list of ideas based on filter type.
+     *
+     * @authenticated
+     *
+     * @queryParam type string required The filter type. Allowed values: popular, viewed, latest.
+     * @queryParam page int optional The page number for pagination. Default: 1.
+     * @queryParam per_page int optional Number of items per page. Default: 5.
+     *
+     * @response array{
+     *      message: string,
+     *      data: array<\App\Http\Resources\Api\IdeaRankingResource>,
+     *      pagination: array{
+     *          current_page: int,
+     *          last_page: int,
+     *          per_page: int,
+     *          total: int
+     *      }
+     * }
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param string $type
+     */
+    public function list(Request $request)
+    {
+        $filter = $request->query('filter', 'latest');
+        $ideas = $this->ideaService->getIdeasByFilter($filter);
+
+        return IdeaRankingResource::collection($ideas);
     }
 }

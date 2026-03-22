@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Comment\IndexCommentRequest;
 use App\Http\Requests\Comment\StoreCommentRequest;
 use App\Http\Requests\Comment\UpdateCommentRequest;
+use App\Http\Resources\Api\CommentRankingResource;
 use App\Http\Resources\Api\CommentResource;
 use App\Models\Comment;
 use App\Repositories\Comment\CommentRepositoryInterface;
@@ -111,5 +112,36 @@ class CommentController extends Controller
         return $this->commentRepository->destroy($comment)
             ? $this->okResponse([], 'Comment deleted successfully.')
             : $this->errorResponse([], 'Failed to delete comment.', 422);
+    }
+
+    /**
+     * List Latest Comments
+     *
+     * Retrieve a paginated list of latest comments.
+     *
+     * @authenticated
+     *
+     * @queryParam filter string required Allowed value: latest.
+     * @queryParam page int optional The page number for pagination. Default: 1.
+     * @queryParam per_page int optional Number of items per page. Default: 5.
+     *
+     * @response array{
+     *      data: array<\App\Http\Resources\Api\CommentRankingResource>,
+     *      pagination: array{
+     *          current_page: int,
+     *          last_page: int,
+     *          per_page: int,
+     *          total: int
+     *      }
+     * }
+     */
+
+    public function listComments(Request $request)
+    {
+        $comments = Comment::with(['idea', 'user'])
+            ->orderByDesc('created_at')
+            ->paginate(5);
+
+        return CommentRankingResource::collection($comments);
     }
 }
