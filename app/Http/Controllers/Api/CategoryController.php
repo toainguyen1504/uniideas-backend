@@ -49,13 +49,13 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $categories = $this->categoryRepository->serverPaginationFiltering($request->all());
-            if (!$categories || $categories->isEmpty()) {
-                return $this->errorResponse(
-                    [],
-                    'No categories found.',
-                    404
-                );
-            }
+        if (!$categories || $categories->isEmpty()) {
+            return $this->errorResponse(
+                [],
+                'No categories found.',
+                404
+            );
+        }
 
         return $this->okResponse([
             'categories' => CategoryResource::collection($categories),
@@ -133,13 +133,18 @@ class CategoryController extends Controller
 
     /**
      * Delete Category
+     *
+     * Xóa một category khỏi hệ thống.
      * 
-     * Remove the specified resource from storage.
-     * 
+     * Điều kiện:
+     * - Category phải tồn tại.
+     * - Category không được gắn với bất kỳ idea nào (nếu có thì không thể xóa).
+     *
      * @response array{
-     *   message: string,
-     *   data: array{},
+     *   message: string, // Thông báo kết quả (thành công hoặc thất bại)
+     *   data: array{}    // Luôn trả về mảng rỗng
      * }
+     *
      */
     public function destroy(Category $category)
     {
@@ -148,6 +153,15 @@ class CategoryController extends Controller
                 [],
                 'Category not found.',
                 404
+            );
+        }
+
+        // Kiểm tra nếu category đang được sử dụng bởi idea
+        if ($category->ideas()->exists()) {
+            return $this->errorResponse(
+                [],
+                'Cannot delete category because it is being used by ideas.',
+                422
             );
         }
 

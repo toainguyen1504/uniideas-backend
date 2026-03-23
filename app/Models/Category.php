@@ -30,4 +30,9 @@ class Category extends Model
     {
         return $query->where('status', CategoryStatus::INACTIVE);
     }
+
+    public function ideas()
+    {
+        return $this->hasMany(Idea::class);
+    }
 }
