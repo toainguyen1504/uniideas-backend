@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Idea;
 
+use App\Acl\Acl;
 use App\Enum\AnonymousEnum;
 use App\Enum\IdeaStatus;
 use Illuminate\Foundation\Http\FormRequest;
@@ -12,8 +13,7 @@ class UpdateIdeaRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Check quyền sửa idea
-        return true;
+        return checkPermission(Acl::PERMISSION_IDEA_EDIT);
     }
 
     public function rules(): array
@@ -23,6 +23,10 @@ class UpdateIdeaRequest extends FormRequest
                 'sometimes',
                 'string',
                 'max:255',
+            ],
+            'content' => [
+                'required',
+                'string',
             ],
             'file_path' => [
                 'nullable',
