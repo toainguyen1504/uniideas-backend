@@ -15,7 +15,8 @@ class CommentRankingResource extends JsonResource
             'idea_id'    => $this->idea_id,
             'idea_title' => $this->idea?->title,
             'user_name'  => $this->user?->name,
-            'created_at' => $this->created_at->toDateString(),
+            'created_at' => $this->created_at->format('j-n-Y H:i'),
+
         ];
     }
 }
