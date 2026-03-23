@@ -142,6 +142,14 @@ class CommentController extends Controller
             ->orderByDesc('created_at')
             ->paginate(5);
 
-        return CommentRankingResource::collection($comments);
+        return $this->okResponse([
+            'comments' => CommentRankingResource::collection($comments),
+            'pagination' => [
+                'current_page' => $comments->currentPage(),
+                'last_page'    => $comments->lastPage(),
+                'per_page'     => $comments->perPage(),
+                'total'        => $comments->total(),
+            ],
+        ], 'comment list retrieved successfully.');
     }
 }

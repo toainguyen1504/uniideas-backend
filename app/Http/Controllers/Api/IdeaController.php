@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Acl\Acl;
+use App\Enum\IdeaFilter;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
@@ -240,9 +241,19 @@ class IdeaController extends Controller
      */
     public function list(Request $request)
     {
-        $filter = $request->query('filter', 'latest');
-        $ideas = $this->ideaService->getIdeasByFilter($filter);
+       $filter = IdeaFilter::tryFrom($request->get('filter')) ?? IdeaFilter::LATEST;
+    $perPage = $request->get('per_page');
 
-        return IdeaRankingResource::collection($ideas);
-    }
+    $ideas = $this->ideaService->getIdeasByFilter($filter, $perPage);
+
+    return $this->okResponse([
+        'ideas' => IdeaResource::collection($ideas),
+        'pagination' => $ideas instanceof \Illuminate\Pagination\LengthAwarePaginator ? [
+            'current_page' => $ideas->currentPage(),
+            'last_page'    => $ideas->lastPage(),
+            'per_page'     => $ideas->perPage(),
+            'total'        => $ideas->total(),
+        ] : null,
+    ], 'idea list retrieved successfully.');
+}
 }

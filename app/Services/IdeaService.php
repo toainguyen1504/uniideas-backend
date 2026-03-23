@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\Acl\Acl;
+use App\Enum\IdeaFilter;
+use App\Enum\IdeaStatus;
 use App\Enum\ReactEnum;
 use App\Enum\SubmissionStatus;
+use App\Http\Resources\Api\IdeaRankingResource;
 use App\Repositories\User\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -136,37 +139,35 @@ class IdeaService
         }
     }
 
-    public function getIdeasByFilter(string $filter)
+    public function getIdeasByFilter(IdeaFilter $filter, ?int $perPage = null)
     {
         $query = Idea::withCount([
             'reacts as likes_count' => fn($q) => $q->where('react', ReactEnum::LIKE),
             'reacts as dislikes_count' => fn($q) => $q->where('react', ReactEnum::DISLIKE),
             'comments as comments_count'
-        ]);
+        ])
+            // chỉ lấy những idea đã được duyệt
+            ->where('status', IdeaStatus::APPROVED->value);
 
-        // thêm field score sau khi withCount đã tạo likes_count/dislikes_count
-   $query = Idea::withCount([
-    'reacts as likes_count' => fn($q) => $q->where('react', ReactEnum::LIKE),
-    'reacts as dislikes_count' => fn($q) => $q->where('react', ReactEnum::DISLIKE),
-    'comments as comments_count'
-]);
+        switch ($filter) {
+            case IdeaFilter::POPULAR:
+                $query->orderByRaw('likes_count - dislikes_count DESC')
+                    ->orderByDesc('views')
+                    ->orderByDesc('created_at');
+                break;
 
-switch ($filter) {
-    case 'popular':
-        $query->orderByRaw('likes_count - dislikes_count DESC')
-              ->orderByDesc('views')
-              ->orderByDesc('created_at');
-        break;
-    case 'viewed':
-        $query->orderByDesc('views')
-              ->orderByRaw('likes_count - dislikes_count DESC')
-              ->orderByDesc('created_at');
-        break;
-    case 'latest':
-        $query->orderByDesc('created_at');
-        break;
-}
+            case IdeaFilter::VIEWED:
+                $query->orderByDesc('views')
+                    ->orderByRaw('likes_count - dislikes_count DESC')
+                    ->orderByDesc('created_at');
+                break;
 
-        return $query->paginate(5);
+            case IdeaFilter::LATEST:
+            default:
+                $query->orderByDesc('created_at');
+                break;
+        }
+
+      return $query->paginate($perPage ?? 5);
     }
 }
