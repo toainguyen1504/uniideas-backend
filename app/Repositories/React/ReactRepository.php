@@ -101,4 +101,13 @@ class ReactRepository extends BaseRepository implements ReactRepositoryInterface
 
         return $query;
     }
+    
+    /**
+     * Lấy tổng số phản ứng theo loại (LIKE, DISLIKE).
+     *
+     */
+    public function countReacts(int $reactType): int
+    {
+        return React::where('react', $reactType)->count();
+    }
 }

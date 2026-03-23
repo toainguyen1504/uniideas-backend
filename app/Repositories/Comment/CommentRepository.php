@@ -44,4 +44,13 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
     {
         return $this->model->where('idea_id', $ideaId)->count();
     }
+
+
+    /**
+     * Lấy tổng số bình luận trong hệ thống.
+     */
+        public function countComments(): int
+    {
+        return DB::table('comments')->count();
+    }
 }

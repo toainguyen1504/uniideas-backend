@@ -125,4 +125,13 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     {
         return $this->model->findOrFail($ideaId);
     }
+
+    
+    /**
+     * Lấy tổng số ý tưởng trong hệ thống.
+     */
+        public function countIdeas(): int
+    {
+        return DB::table('ideas')->count();
+    }
 }

@@ -8,21 +8,6 @@ use Illuminate\Support\Facades\DB;
 
 class StatisticsRepository implements StatisticsRepositoryInterface
 {
-    public function countIdeas(): int
-    {
-        return DB::table('ideas')->count();
-    }
-
-    public function countComments(): int
-    {
-        return DB::table('comments')->count();
-    }
-
-    public function countReacts(int $reactType): int
-    {
-        return React::where('react', $reactType)->count();
-    }
-
     public function getDepartmentStats()
     {
         return DB::table('departments as d')
