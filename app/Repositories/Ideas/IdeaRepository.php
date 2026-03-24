@@ -125,4 +125,5 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     {
         return $this->model->findOrFail($ideaId);
     }
+
 }
