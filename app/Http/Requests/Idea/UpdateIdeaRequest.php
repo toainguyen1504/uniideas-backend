@@ -30,11 +30,7 @@ class UpdateIdeaRequest extends FormRequest
             ],
             'file_path' => [
                 'nullable',
-            ],
-            'status' => [
-                'nullable',
-                'integer',
-                new Enum(IdeaStatus::class),
+                'max:10240',
             ],
             'is_anonymous' => [
                 'nullable',
@@ -51,7 +47,6 @@ class UpdateIdeaRequest extends FormRequest
                 'exists:submissions,id',
             ],
 
-            'is_featured' => ['sometimes', 'boolean'],
             'intro'       => ['sometimes', 'string'],
         ];
     }

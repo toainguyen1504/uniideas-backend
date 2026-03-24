@@ -23,7 +23,7 @@ class DepartmentController extends Controller
     public function __construct(
         protected DepartmentRepository $departmentRepository,
     ) {
-        $this->middleware('permission:'.Acl::PERMISSION_DEPARTMENT_LIST)->only('index', 'show');
+        // $this->middleware('permission:'.Acl::PERMISSION_DEPARTMENT_LIST)->only('index', 'show');
         $this->middleware('permission:'.Acl::PERMISSION_DEPARTMENT_ADD)->only('store');
         $this->middleware('permission:'.Acl::PERMISSION_DEPARTMENT_EDIT)->only('update');
         $this->middleware('permission:'.Acl::PERMISSION_DEPARTMENT_DELETE)->only('destroy');
