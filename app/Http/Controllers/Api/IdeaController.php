@@ -217,28 +217,22 @@ class IdeaController extends Controller
     /**
      * List Ideas by Filter
      *
-     * Retrieve a paginated list of ideas based on filter type.
      *
-     * @authenticated
+     * 1. The filter type. Allowed values: popular, viewed, latest.  
+     *    - Nếu nhập khác những giá trị này (ví dụ: "popu", "lat", "view") → trả về lỗi (400 Bad Request).  
+     *    - Nếu nhập đúng nhưng không có ideas nào tương ứng → trả về success với mảng rỗng.
+     * 2. Rules:  
+     *    - Chỉ lấy danh sách ideas đã được approve.  
+     *    - Filter là bắt buộc: phải là một trong [popular, viewed, latest].  
+     *    - Invalid filter → trả về lỗi.  
+     *    - Valid filter nhưng không có dữ liệu → trả về success với data rỗng.
      *
-     * @queryParam type string required The filter type. Allowed values: popular, viewed, latest.
-     * @queryParam page int optional The page number for pagination. Default: 1.
-     * @queryParam per_page int optional Number of items per page. Default: 5.
-     *
-     * @response array{
-     *      message: string,
-     *      data: array<\App\Http\Resources\Api\IdeaRankingResource>,
-     *      pagination: array{
-     *          current_page: int,
-     *          last_page: int,
-     *          per_page: int,
-     *          total: int
-     *      }
-     * }
+     * 
      *
      * @param \Illuminate\Http\Request $request
      * @param string $type
      */
+
     public function list($filter)
     {
         $filterEnum = IdeaFilter::tryFrom($filter);
