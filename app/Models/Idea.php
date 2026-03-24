@@ -112,4 +112,9 @@ class Idea extends Model implements HasMedia
         
         return $this->hasOne(React::class)->where('user_id', $userId);
     }
+
+    public function comments()
+{
+    return $this->hasMany(Comment::class, 'idea_id');
+}
 }

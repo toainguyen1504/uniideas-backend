@@ -29,11 +29,7 @@ class StoreIdeaRequest extends FormRequest
             ],
             'file_path' => [
                 'nullable',
-            ],
-            'status' => [
-                'nullable',
-                'integer',
-                new Enum(IdeaStatus::class),
+                'max:10240',
             ],
             'is_anonymous' => [
                 'nullable',
@@ -48,10 +44,6 @@ class StoreIdeaRequest extends FormRequest
                 'required',
                 'integer',
                 'exists:submissions,id',
-            ],
-            'is_featured' => [
-                'nullable',
-                'boolean'
             ],
             'intro'       => [
                 'nullable',

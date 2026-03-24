@@ -77,6 +77,8 @@ final class Acl
     
     const PERMISSION_IDEA_DELETE = 'Delete Idea';
 
+    const PERMISSION_IDEA_APPROVE = 'Approve Idea';
+
     /**
      * @param  array  $exclusives Exclude some permissions from the list
      */
