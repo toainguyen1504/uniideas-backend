@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Resources\Api;
 
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -14,10 +15,10 @@ class IdeaRankingResource extends JsonResource
         return [
             'id'             => $this->id,
             'title'          => $this->title,
-            'views'          => $this->total_views ?? 0, 
+            'views'          => $this->total_views ?? 0,
             'likes_count'    => $likes,
             'dislikes_count' => $dislikes,
-            'comments_count' => $comments,
+            'comments_count' => $this->total_comments ?? 0,
             'score'          => $likes - $dislikes,
             'created_at'     => $this->created_at->toDateString(),
         ];

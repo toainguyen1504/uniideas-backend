@@ -98,7 +98,7 @@ class IdeaController extends Controller
      *
      * @param \App\Http\Requests\Idea\StoreIdeaRequest $request
      */
-   public function store(StoreIdeaRequest $request)
+    public function store(StoreIdeaRequest $request)
     {
         $idea = $this->ideaService->create($request->validated());
 
@@ -239,12 +239,18 @@ class IdeaController extends Controller
      * @param \Illuminate\Http\Request $request
      * @param string $type
      */
-    public function list(Request $request)
+    public function list($filter)
     {
-        $filter = IdeaFilter::tryFrom($request->get('filter')) ?? IdeaFilter::LATEST;
-        $perPage = $request->get('per_page');
+        $filterEnum = IdeaFilter::tryFrom($filter);
 
-        $ideas = $this->ideaService->getIdeasByFilter($filter, $perPage);
+
+        if (!$filterEnum) {
+            return response()->json([
+                'success' => false,
+                'message' => "Invalid filter value: {$filter}"
+            ], 400);
+        }
+        $ideas = $this->ideaService->getIdeasByFilter($filterEnum);
 
         return $this->okResponse([
             'ideas' => IdeaResource::collection($ideas),
@@ -256,6 +262,7 @@ class IdeaController extends Controller
             ] : null,
         ], 'idea list retrieved successfully.');
     }
+
 
 
     /**
