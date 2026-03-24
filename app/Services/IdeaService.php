@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\Acl\Acl;
+use App\Enum\IdeaFilter;
 use App\Enum\IdeaStatus;
+use App\Enum\ReactEnum;
 use App\Enum\SubmissionStatus;
+use App\Http\Resources\Api\IdeaRankingResource;
 use App\Repositories\User\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,6 +21,8 @@ use App\Repositories\Submission\SubmissionRepositoryInterface;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Arr;
+
+
 
 class IdeaService
 {
@@ -46,7 +51,7 @@ class IdeaService
         if ($submission->status !== SubmissionStatus::OPEN) {
             return null;
         }
-        
+
         try {
             DB::beginTransaction();
 
@@ -81,7 +86,7 @@ class IdeaService
 
             if ($qaCoordinators->isNotEmpty()) {
                 Notification::send(
-                    $qaCoordinators, 
+                    $qaCoordinators,
                     new NewIdeaNotification(auth()->user(), $idea)
                 );
             }
@@ -110,10 +115,10 @@ class IdeaService
                 return null;
             }
         }
-        
+
         try {
             DB::beginTransaction();
-            
+
             if (isset($data['title'])) {
                 $data['slug'] = Str::slug($data['title']);
             }
@@ -153,13 +158,43 @@ class IdeaService
 
             $model->update($data);
 
-            DB::commit();            
+            DB::commit();
             return $model;
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
             return null;
         }
+    }
+
+    public function getIdeasByFilter(IdeaFilter $filter, ?int $perPage = null)
+    {
+        $query = Idea::withCount([
+            'reacts as likes_count' => fn($q) => $q->where('react', ReactEnum::LIKE),
+            'reacts as dislikes_count' => fn($q) => $q->where('react', ReactEnum::DISLIKE),
+            'comments as comments_count'
+        ])->where('status', IdeaStatus::APPROVED->value);
+
+        switch ($filter) {
+            case IdeaFilter::POPULAR:
+                $query->orderByRaw('likes_count - dislikes_count DESC')
+                    ->orderByDesc('views')
+                    ->orderByDesc('created_at');
+                break;
+
+            case IdeaFilter::VIEWED:
+                $query->orderByDesc('views')
+                    ->orderByRaw('likes_count - dislikes_count DESC')
+                    ->orderByDesc('created_at');
+                break;
+
+            case IdeaFilter::LATEST:
+            default:
+                $query->orderByDesc('created_at');
+                break;
+        }
+
+      return $query->paginate($perPage ?? 5);
     }
 
     /**
