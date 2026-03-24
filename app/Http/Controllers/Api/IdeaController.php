@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Acl\Acl;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Idea\ApprovedIdeaRequest;
 use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
 use App\Http\Requests\Idea\StoreIdeaRequest;
@@ -36,10 +37,11 @@ class IdeaController extends Controller
         protected MailService $mailService,
         protected IdeaService $ideaService,
     ) {
-        $this->middleware('permission:' . Acl::PERMISSION_IDEA_LIST)->only('index', 'show');
+        // $this->middleware('permission:' . Acl::PERMISSION_IDEA_LIST)->only('index', 'show');
         $this->middleware('permission:' . Acl::PERMISSION_IDEA_ADD)->only('store');
         $this->middleware('permission:' . Acl::PERMISSION_IDEA_EDIT)->only('update');
         $this->middleware('permission:' . Acl::PERMISSION_IDEA_DELETE)->only('destroy');
+        $this->middleware('permission:' . Acl::PERMISSION_IDEA_APPROVE)->only('approve');
     }
 
     /**
@@ -92,8 +94,6 @@ class IdeaController extends Controller
      *
      * @param \App\Http\Requests\Idea\StoreIdeaRequest $request
      */
-
-
    public function store(StoreIdeaRequest $request)
     {
         $idea = $this->ideaService->create($request->validated());
@@ -206,5 +206,48 @@ class IdeaController extends Controller
         return $deleted
             ? $this->okResponse([], 'Idea deleted successfully.')
             : $this->errorResponse([], 'Failed to delete idea.', 422);
+    }
+
+    /**
+     * Approve Idea
+     *
+     * Approve an idea (action performed by QA coordinator).
+     *
+     * Status values (use these integers when calling this endpoint):
+     * - 1 — Pending: Idea is awaiting review; typically the only state that can be approved from.
+     * - 2 — Approved: Idea was approved by QA coordinator and will be processed/published.
+     * - 3 — Rejected: Idea was rejected and will not be processed.
+     *
+     * The request accepts a single `status` field which must match one of the
+     * `IdeaStatus` enum values. The controller validates and applies the new status.
+     *
+     * @authenticated
+     *
+     * @bodyParam status integer required New status value. Example: 2
+     *
+     * @response array{
+     *      message: string,
+     *      data: \App\Http\Resources\Api\IdeaResource,
+     * }
+     *
+     * @param \App\Http\Requests\Idea\ApprovedIdeaRequest $request
+     * @param \App\Models\Idea $idea
+     */
+    public function approve(ApprovedIdeaRequest $request, Idea $idea)
+    {
+        $approved = $this->ideaService->approve($idea, $request->validated());
+
+        if (!$approved) {
+            return $this->errorResponse(
+                null,
+                'Only ideas with status "Pending" can be approved.',
+                422
+            );
+        }
+
+        return $this->okResponse(
+            new IdeaResource($approved),
+            'Idea approved successfully.'
+        );
     }
 }

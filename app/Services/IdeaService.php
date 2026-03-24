@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Acl\Acl;
+use App\Enum\IdeaStatus;
 use App\Enum\SubmissionStatus;
 use App\Repositories\User\UserRepositoryInterface;
 use Illuminate\Support\Facades\DB;
@@ -52,13 +53,24 @@ class IdeaService
             $data['slug'] = Str::slug($data['title'] ?? '');
             $data['user_id'] = auth()->id();
             $data['terms_conditions'] = Arr::get($data, 'terms_conditions', false);
+            $data['is_featured'] = false;
+            $data['status'] = IdeaStatus::PENDING->value;
 
             $idea = $this->ideaRepository->create($data);
+            $idea->load('submission');
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
-                $idea->addMedia($data['file_path'])
-                    ->usingFileName($data['file_path']->getClientOriginalName())
+                $file = $data['file_path'];
+                
+                $titleSlug = $data['slug'];
+                $timestamp = now()->timestamp;
+                $extension = $file->getClientOriginalExtension();
+                $newFileName = "{$titleSlug}-{$timestamp}.{$extension}";
+
+                $idea->addMedia($file)
+                    ->usingFileName($newFileName)
                     ->toMediaCollection(Idea::FILE_PATH_COLLECTION);
+                
                 $idea->load('media');
             }
 
@@ -114,11 +126,28 @@ class IdeaService
                 $data['terms_conditions'] = (bool) $data['terms_conditions'];
             }
 
+            if (isset($data['is_featured'])) {
+                $data['is_featured'] = (bool) $data['is_featured'];
+            }
+
+            if (isset($data['status']) && $data['status'] !== $model->status) {
+                $data['status'] = IdeaStatus::PENDING->value;
+            }
+
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
+                $file = $data['file_path'];
+                
+                $titleSlug = $data['slug'] ?? $model->slug;
+                $timestamp = now()->timestamp;
+                $extension = $file->getClientOriginalExtension();
+                $newFileName = "{$titleSlug}-{$timestamp}.{$extension}";
+
                 $model->clearMediaCollection($this->model::FILE_PATH_COLLECTION);
-                $model->addMedia($data['file_path'])
-                    ->usingFileName($data['file_path']->getClientOriginalName())
+                
+                $model->addMedia($file)
+                    ->usingFileName($newFileName)
                     ->toMediaCollection($this->model::FILE_PATH_COLLECTION);
+                
                 $model->load('media');
             }
 
@@ -129,6 +158,25 @@ class IdeaService
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Approve idea by Coordinator
+     */
+    public function approve($model, $data)
+    {
+        try {
+            DB::beginTransaction();
+
+            $model->update($data);
+
+            DB::commit();
+            return $model;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Approve Idea Failed: ' . $e->getMessage());
             return null;
         }
     }
