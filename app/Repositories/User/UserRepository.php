@@ -51,7 +51,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         $keyword = Arr::get($searchParams, 'search', '');
         $status = Arr::get($searchParams, 'status', null);
 
-        $query = $this->model->query()->with('roles');
+        $query = $this->model->query()->with(['roles', 'department']);
 
         if ($keyword) {
             if (is_array($keyword)) {
@@ -59,9 +59,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             }
             $query->where(function ($q) use ($keyword) {
                 $q->where('id', 'like', '%' . $keyword . '%')
-                    ->orWhereHas('user', function ($q) use ($keyword) {
-                        $q->where('name', 'like', '%' . $keyword . '%');
-                    });
+                    ->orWhere('name', 'like', '%' . $keyword . '%');
             });
         }
 
@@ -75,11 +73,17 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     /**
      * Get users by QA Coordinator role
      */
-    public function getUsersByQACoordinatorRole()
+    public function getUsersByQACoordinatorRole(?int $departmentId = null)
     {
-        return $this->model->whereHas('roles', function ($q) {
+        $query = $this->model->whereHas('roles', function ($q) {
             $q->where('name', Acl::ROLE_QA_COORDINATOR);
-        })->get();
+        });
+
+        if (!is_null($departmentId)) {
+            $query->where('department_id', $departmentId);
+        }
+
+        return $query->get();
     }
 
     /**

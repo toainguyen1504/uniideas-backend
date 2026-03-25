@@ -16,9 +16,9 @@ interface UserRepositoryInterface extends RepositoryInterface
     public function serverPaginationFiltering($searchParams): LengthAwarePaginator;
 
     /**
-     * Get users by QA Coordinator role
+     * Get users by QA Coordinator role, optionally filtered by department id
      */
-    public function getUsersByQACoordinatorRole();
+    public function getUsersByQACoordinatorRole(?int $departmentId = null);
 
     /**
      * Get notifications of user.
