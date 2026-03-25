@@ -49,7 +49,8 @@ class CommentService
 
             $data['user_id'] = auth()->id();
             $comment = $this->commentRepository->create($data);
-
+            $comment->idea()->increment('total_comments');
+            
             $ideaOwner = $comment->idea->user ?? null;
 
             if ($ideaOwner && $ideaOwner->id !== auth()->id()) {

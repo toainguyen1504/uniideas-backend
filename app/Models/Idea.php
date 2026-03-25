@@ -28,6 +28,7 @@ class Idea extends Model implements HasMedia
         'submission_id',
         'is_featured', 
         'intro', 
+        'total_likes',
         'terms_conditions',
     ];
 

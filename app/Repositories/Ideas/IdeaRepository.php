@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Ideas;
 
+use App\Enum\ReactEnum;
 use App\Models\Idea;
 use App\Models\Submission;
 use App\Repositories\BaseRepository;
@@ -126,4 +127,24 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
         return $this->model->findOrFail($ideaId);
     }
 
+    /**
+     * Get top 3 ideas have is_featured = true in a submission and have most court likes.
+     */
+    public function getTopFeaturedIdeas($submissionId, int $limit = 3)
+    {
+        return $this->model->where('submission_id', $submissionId)
+            ->where('is_featured', true)
+            ->with(['media'])
+            ->withCount([
+                'reacts as total_likes' => function ($q) {
+                    $q->where('react', ReactEnum::LIKE->value);
+                },
+                'comments as comments_count'
+            ])
+            ->orderByDesc('total_likes')
+            ->orderByDesc('created_at')
+            ->orderByDesc('total_views')
+            ->limit($limit)
+            ->get();
+    }
 }
