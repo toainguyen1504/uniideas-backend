@@ -22,5 +22,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SubmissionPermissionSeeder::class);
         $this->call(IdeaPermissionSeeder::class);
         $this->call(ApproveIdeaPermission::class);
+        $this->call(DepartmentWithUsersSeeder::class);
     }
 }
