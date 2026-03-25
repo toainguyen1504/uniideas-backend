@@ -26,8 +26,16 @@ class ReactController extends Controller
     
     /**
      * Create a new react.
-     * 
-     * Store a newly created resource in storage.
+     *
+     * Store a newly created resource in storage. Fields:
+     * - `idea_id` (int, required): ID of the idea being reacted to.
+     * - `react` (int, nullable): React type. Use values from `ReactEnum`:
+     *     - `0` — Unknown
+     *     - `1` — Like
+     *     - `2` — Dislike
+     * - `is_anonymous` (int, nullable): Whether the react is anonymous. Use values from `AnonymousEnum`:
+     *     - `1` — Anonymous
+     *     - `2` — Not Anonymous
      * 
      * @authenticated
      * 
@@ -48,7 +56,15 @@ class ReactController extends Controller
     /**
      * Update React
      * 
-     * Update the specified resource in storage.
+     * Update the specified resource in storage. Fields (same as store):
+     * - `idea_id` (int): ID of the idea being reacted to.
+     * - `react` (int, nullable): React type. Use values from `ReactEnum`:
+     *     - `0` — Unknown
+     *     - `1` — Like
+     *     - `2` — Dislike
+     * - `is_anonymous` (int, nullable): Whether the react is anonymous. Use values from `AnonymousEnum`:
+     *     - `1` — Anonymous
+     *     - `2` — Not Anonymous
      * 
      * @authenticated
      * 
