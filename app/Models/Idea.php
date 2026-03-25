@@ -91,6 +91,16 @@ class Idea extends Model implements HasMedia
     }
 
     /**
+     * Get comments for the idea.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class, 'idea_id');
+    }
+
+    /**
      * Get react for the idea by specific user.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
@@ -101,9 +111,4 @@ class Idea extends Model implements HasMedia
         
         return $this->hasOne(React::class)->where('user_id', $userId);
     }
-
-    public function comments()
-{
-    return $this->hasMany(Comment::class, 'idea_id');
-}
 }
