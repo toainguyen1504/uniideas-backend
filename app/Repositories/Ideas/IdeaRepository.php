@@ -134,13 +134,16 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     {
         return $this->model->where('submission_id', $submissionId)
             ->where('is_featured', true)
+            ->with(['media'])
             ->withCount([
-                'reacts as likes_count' => function ($q) {
+                'reacts as total_likes' => function ($q) {
                     $q->where('react', ReactEnum::LIKE->value);
                 },
                 'comments as comments_count'
             ])
-            ->orderBy('likes_count', 'desc')
+            ->orderByDesc('total_likes')
+            ->orderByDesc('created_at')
+            ->orderByDesc('total_views')
             ->limit($limit)
             ->get();
     }
