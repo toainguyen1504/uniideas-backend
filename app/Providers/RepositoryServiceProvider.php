@@ -12,6 +12,8 @@ use App\Repositories\Ideas\IdeaRepository;
 use App\Repositories\Ideas\IdeaRepositoryInterface;
 use App\Repositories\Notification\NotificationRepository;
 use App\Repositories\Notification\NotificationRepositoryInterface;
+use App\Repositories\Permission\PermissionRepository;
+use App\Repositories\Permission\PermissionRepositoryInterface;
 use App\Repositories\React\ReactRepository;
 use App\Repositories\React\ReactRepositoryInterface;
 use App\Repositories\Role\RoleRepository;
@@ -43,6 +45,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->singleton(CommentRepositoryInterface::class, CommentRepository::class);
         $this->app->singleton(ViewRepositoryInterface::class, ViewRepository::class);
         $this->app->singleton(NotificationRepositoryInterface::class, NotificationRepository::class);
+        $this->app->singleton(PermissionRepositoryInterface::class, PermissionRepository::class);
     }
 
     /**

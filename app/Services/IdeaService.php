@@ -79,7 +79,8 @@ class IdeaService
                 $idea->load('media');
             }
 
-            $qaCoordinators = $this->userRepository->getUsersByQACoordinatorRole();
+            $departmentId = auth()->user()->department_id ?? null;
+            $qaCoordinators = $this->userRepository->getUsersByQACoordinatorRole($departmentId);
             $qaCoordinators = $qaCoordinators->reject(function ($user) {
                 return $user->id === auth()->id();
             });
