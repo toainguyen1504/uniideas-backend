@@ -87,7 +87,10 @@ class IdeaController extends Controller
     /**
      * Create Idea
      *
-     * Store a newly created resource in storage.
+     * Store a newly created resource in storage. Field:
+     * - `is_anonymous` (int): Whether the react is anonymous. Use values from `AnonymousEnum`:
+     *     - `1` — Anonymous
+     *     - `2` — Not Anonymous
      *
      * @authenticated
      *
@@ -160,6 +163,9 @@ class IdeaController extends Controller
      * Edit Idea
      *
      * Update the specified resource in storage.
+     * - `is_anonymous` (int): Whether the react is anonymous. Use values from `AnonymousEnum`:
+     *     - `1` — Anonymous
+     *     - `2` — Not Anonymous
      *
      * @authenticated
      *

@@ -58,6 +58,9 @@ class DepartmentController extends Controller
      * Create Department
      * 
      * Store a newly created resource in storage.
+     * - `status` (int): Department status. Use values from `ActiveStatus`:
+     *    - `1` — Active
+     *    - `2` — Inactive
      * 
      * @authenticated
      * 
@@ -104,6 +107,10 @@ class DepartmentController extends Controller
      * Edit Department
      * 
      * Update the specified resource in storage.
+     * 
+     * - `status` (int): Department status. Use values from `ActiveStatus`:
+     *    - `1` — Active
+     *    - `2` — Inactive
      * 
      * @authenticated
      * 
