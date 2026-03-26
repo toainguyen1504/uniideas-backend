@@ -115,6 +115,11 @@ class IdeaService
             if ($submission->status !== SubmissionStatus::OPEN) {
                 return null;
             }
+        } else {
+            $submission = $model->submission ?? $this->submissionRepository->find($model->submission_id);
+            if ($submission && $submission->status !== SubmissionStatus::OPEN) {
+                return null;
+            }
         }
 
         try {
@@ -148,12 +153,12 @@ class IdeaService
                 $extension = $file->getClientOriginalExtension();
                 $newFileName = "{$titleSlug}-{$timestamp}.{$extension}";
 
-                $model->clearMediaCollection($this->model::FILE_PATH_COLLECTION);
-                
+                $model->clearMediaCollection($model::FILE_PATH_COLLECTION);
+
                 $model->addMedia($file)
                     ->usingFileName($newFileName)
-                    ->toMediaCollection($this->model::FILE_PATH_COLLECTION);
-                
+                    ->toMediaCollection($model::FILE_PATH_COLLECTION);
+
                 $model->load('media');
             }
 
