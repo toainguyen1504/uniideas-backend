@@ -24,7 +24,7 @@ class UserController extends Controller
         protected UserRepositoryInterface $userRepository,
         protected UserService $userService,
     ) {
-        $this->middleware('permission:' . Acl::PERMISSION_USER_LIST)->only('index');
+        // $this->middleware('permission:' . Acl::PERMISSION_USER_LIST)->only('index');
         $this->middleware('permission:' . Acl::PERMISSION_USER_ADD)->only(['store']);
         $this->middleware('permission:' . Acl::PERMISSION_USER_EDIT)->only(['update']);
         $this->middleware('permission:' . Acl::PERMISSION_USER_DELETE)->only('destroy');

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Repositories\User\UserRepositoryInterface;
 use Nette\Utils\Json;
+use Illuminate\Support\Facades\Log;
 
 class UserService
 {
@@ -39,7 +40,8 @@ class UserService
             $user = $this->userRepository->create($data);
 
             if (isset($data['department_id']) && $data['department_id']) {
-                $user->department()->attach($data['department_id']);
+                $user->department()->associate($data['department_id']);
+                $user->save();
             }
 
             $rolesInput = $data['roles'] ?? [];
@@ -51,12 +53,14 @@ class UserService
                 }
             }
             $user->syncRoles(array_map(fn($role) => (int) $role, $rolesInput));
+            $user->load('roles');
 
             DB::commit();
 
             return $user;
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::error('Error creating user: ' . $e->getMessage());
             return null;
         }
     }
@@ -92,12 +96,14 @@ class UserService
                 }
             }
             $user->syncRoles(array_map(fn($role) => (int) $role, $rolesInput));
+            $user->load('roles');
 
             DB::commit();
 
             return $user;
         } catch (\Throwable $e) {
             DB::rollBack();
+            Log::error('Error updating user: ' . $e->getMessage());
             return null;
         }
     }

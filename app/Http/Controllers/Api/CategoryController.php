@@ -24,7 +24,7 @@ class CategoryController extends Controller
         protected CategoryRepositoryInterface $categoryRepository,
         protected CategoryService $categoryService,
     ) {
-        $this->middleware('permission:' . Acl::PERMISSION_CATEGORY_LIST)->only('index', 'show');
+        // $this->middleware('permission:' . Acl::PERMISSION_CATEGORY_LIST)->only('index', 'show');
         $this->middleware('permission:' . Acl::PERMISSION_CATEGORY_ADD)->only('store');
         $this->middleware('permission:' . Acl::PERMISSION_CATEGORY_EDIT)->only('update');
         $this->middleware('permission:' . Acl::PERMISSION_CATEGORY_DELETE)->only('destroy');
