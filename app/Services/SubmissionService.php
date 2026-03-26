@@ -6,6 +6,7 @@ use App\Models\Submission;
 use Illuminate\Support\Str;
 use ZipArchive;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Illuminate\Support\Facades\Storage;
 
 class SubmissionService
 {
@@ -14,13 +15,14 @@ class SubmissionService
      */
     public function createZipForSubmission(Submission $submission): string
     {
-        $zipFileName = Str::slug($submission->title) . '-' . now()->timestamp . '.zip';
-        $zipPath = storage_path('app/public/temp/' . $zipFileName);
+        if (!Storage::disk('public')->exists('temp')) {
+            Storage::disk('public')->makeDirectory('temp');
+        }
+        
+        $submissionSlug = Str::slug($submission->name) . '-' . $submission->created_at->timestamp;
+        $zipFileName = $submissionSlug . '.zip';
 
-        // Create temp if it doesn't exist
-        // if (!file_exists(storage_path('app/public/temp'))) {
-        //     mkdir(storage_path('app/public/temp'), 0755, true);
-        // }
+        $zipPath = storage_path('app/public/temp/' . $zipFileName);
 
         $zip = new ZipArchive;
 
