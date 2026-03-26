@@ -57,10 +57,15 @@ class UserController extends Controller
                 'No users found.', 404
             );
         }
-        return $this->okResponse(
-            UserResource::collection($users), 
-            'User list retrieved successfully.', 
-        );
+        return $this->okResponse([
+            'users' => UserResource::collection($users),
+            'pagination' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+            ], 
+        ], 'Users retrieved successfully.');
     }
 
     /**
