@@ -25,13 +25,10 @@ class UpdateIdeaRequest extends FormRequest
                 'max:255',
             ],
             'content' => [
-                'required',
+                'sometimes', //fix
                 'string',
             ],
-            'file_path' => [
-                'nullable',
-                'max:10240',
-            ],
+            'file' => ['nullable', 'file', 'max:10240'], // fix, here file not file_path
             'is_anonymous' => [
                 'nullable',
                 new Enum(AnonymousEnum::class)

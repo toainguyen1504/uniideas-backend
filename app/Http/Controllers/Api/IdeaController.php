@@ -103,7 +103,15 @@ class IdeaController extends Controller
      */
     public function store(StoreIdeaRequest $request)
     {
-        $idea = $this->ideaService->create($request->validated());
+        // $idea = $this->ideaService->create($request->validated());
+
+        // Fix
+        $data = $request->validated();
+        if ($request->hasFile('file')) {
+            $data['file_path'] = $request->file('file');
+        }
+
+        $idea = $this->ideaService->create($data);
 
         if (!$idea) {
             return $this->errorResponse(
@@ -179,10 +187,17 @@ class IdeaController extends Controller
      */
     public function update(UpdateIdeaRequest $request, Idea $idea)
     {
-        $updated = $this->ideaService->update($idea, $request->validated());
+        // $updated = $this->ideaService->update($idea, $request->validated());
+        // Fix
+        $data = $request->validated();
+        if ($request->hasFile('file')) {
+            $data['file_path'] = $request->file('file');
+        }
+
+        $updated = $this->ideaService->update($idea, $data);
 
         if (!$updated) {
-            return $this->okResponse(
+            return $this->errorResponse(
                 null,
                 'Submission is read-only. Cannot update idea.',
                 422
