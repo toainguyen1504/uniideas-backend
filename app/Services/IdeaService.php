@@ -66,7 +66,7 @@ class IdeaService
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
                 $file = $data['file_path'];
-                
+
                 $titleSlug = $data['slug'];
                 $timestamp = now()->timestamp;
                 $extension = $file->getClientOriginalExtension();
@@ -75,7 +75,7 @@ class IdeaService
                 $idea->addMedia($file)
                     ->usingFileName($newFileName)
                     ->toMediaCollection(Idea::FILE_PATH_COLLECTION);
-                
+
                 $idea->load('media');
             }
 
@@ -142,19 +142,25 @@ class IdeaService
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
                 $file = $data['file_path'];
-                
+
                 $titleSlug = $data['slug'] ?? $model->slug;
                 $timestamp = now()->timestamp;
                 $extension = $file->getClientOriginalExtension();
                 $newFileName = "{$titleSlug}-{$timestamp}.{$extension}";
 
-                $model->clearMediaCollection($this->model::FILE_PATH_COLLECTION);
-                
+                // $model->clearMediaCollection($this->model::FILE_PATH_COLLECTION); //$this->model KHÔNG tồn tại trong Service
+                $model->clearMediaCollection(Idea::FILE_PATH_COLLECTION);
+
+                // $model->addMedia($file)
+                //     ->usingFileName($newFileName)
+                //     ->toMediaCollection($this->model::FILE_PATH_COLLECTION);
                 $model->addMedia($file)
                     ->usingFileName($newFileName)
-                    ->toMediaCollection($this->model::FILE_PATH_COLLECTION);
-                
+                    ->toMediaCollection(Idea::FILE_PATH_COLLECTION);
+
                 $model->load('media');
+
+                unset($data['file_path']); //fix
             }
 
             $model->update($data);
@@ -208,7 +214,7 @@ class IdeaService
                 break;
         }
 
-      return $query->paginate($perPage ?? 5);
+        return $query->paginate($perPage ?? 5);
     }
 
     /**
