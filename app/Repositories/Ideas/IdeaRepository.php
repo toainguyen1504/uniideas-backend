@@ -171,4 +171,13 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
 
         return $topIdeas;
     }
+
+    
+    /**
+     * Count total ideas in the system.
+     */
+    public function countIdeas(): int
+    {
+        return $this->model->count();
+    }
 }

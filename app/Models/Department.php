@@ -19,9 +19,9 @@ class Department extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'name', 
-        'status', 
-        'created_at', 
+        'name',
+        'status',
+        'created_at',
         'updated_at',
     ];
 
@@ -40,5 +40,10 @@ class Department extends Model
     public function users()
     {
         return $this->hasMany(User::class);
+    }
+
+    public function ideas()
+    {
+        return $this->hasMany(Idea::class);
     }
 }

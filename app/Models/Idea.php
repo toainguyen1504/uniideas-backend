@@ -33,7 +33,7 @@ class Idea extends Model implements HasMedia
     ];
 
     protected $casts = [
-        'status'         => IdeaStatus::class, 
+        'status'         => IdeaStatus::class,
         'is_anonymous'   => AnonymousEnum::class,
         'total_views'    => 'integer',
         'total_comments' => 'integer',
@@ -58,6 +58,11 @@ class Idea extends Model implements HasMedia
     public function submission()
     {
         return $this->belongsTo(Submission::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 
     /**
@@ -109,7 +114,7 @@ class Idea extends Model implements HasMedia
     public function userReact($userId = null): HasOne
     {
         $userId = $userId ?? auth()->id();
-        
+
         return $this->hasOne(React::class)->where('user_id', $userId);
     }
 }

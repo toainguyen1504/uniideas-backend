@@ -36,6 +36,7 @@ Route::prefix('v1')
             include 'v1/api/export.php';
             include 'v1/api/permission.php';
             include 'v1/api/download_zip.php';
+            include 'v1/api/statistics.php';
         });
         include 'v1/api/auth.php';
     });

@@ -38,4 +38,9 @@ interface IdeaRepositoryInterface extends RepositoryInterface
      * Get top 3 ideas have is_featured = true in a submission and have most court likes.
      */
     public function getTopFeaturedIdeas($submissionId, int $limit = 3);
+
+    /**
+     * Count total ideas in the system.
+     */
+    public function countIdeas(): int;
 }
