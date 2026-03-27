@@ -40,7 +40,7 @@ class CommentService
         $idea = $this->ideaRepository->getIdeaById($data['idea_id']);
         
         $submission = $idea->submission;
-        if ($submission->status !== SubmissionStatus::OPEN) {
+        if ($submission->status == SubmissionStatus::FINALLY_CLOSED) {
             return null;
         }
 
@@ -73,7 +73,7 @@ class CommentService
     public function update(Comment $comment, array $data): ?Comment
     {
         $submission = $comment->idea->submission;
-        if ($submission->status !== SubmissionStatus::OPEN) {
+        if ($submission->status == SubmissionStatus::FINALLY_CLOSED) {
             return null;
         }
 

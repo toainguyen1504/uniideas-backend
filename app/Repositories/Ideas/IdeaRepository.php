@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Ideas;
 
+use App\Enum\IdeaStatus;
 use App\Enum\ReactEnum;
 use App\Models\Idea;
 use App\Models\Submission;
@@ -139,6 +140,7 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     public function getTopFeaturedIdeas($submissionId, int $limit = 3)
     {
         $query = $this->model->where('submission_id', $submissionId)
+            ->where('status', IdeaStatus::APPROVED->value)
             ->with(['media'])
             ->withCount([
                 'reacts as total_likes' => function ($q) {
