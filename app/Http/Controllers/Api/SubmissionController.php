@@ -11,6 +11,7 @@ use App\Http\Resources\Api\SubmissionResource;
 use App\Models\Submission;
 use App\Repositories\Submission\SubmissionRepositoryInterface;
 use App\Acl\Acl;
+use App\Enum\SubmissionStatus;
 use App\Http\Resources\Api\CommentResource;
 use App\Http\Resources\Api\IdeaResource;
 use App\Repositories\Comment\CommentRepositoryInterface;
@@ -155,10 +156,6 @@ class SubmissionController extends Controller
         $submission = $this->submissionRepository->find($submissionId);
         if (!$submission) {
             return $this->errorResponse(null, 'Submission not found.', 404);
-        }
-
-        if ($submission->is_closed) {
-            return $this->errorResponse(null, 'Submission was closed.', 422);
         }
 
         $ideas = $this->ideaRepository->getTopFeaturedIdeas($submissionId);
