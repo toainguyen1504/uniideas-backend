@@ -5,13 +5,11 @@ namespace App\Repositories\Statistics;
 interface StatisticsRepositoryInterface
 {
     /**
-     * Lấy thống kê chi tiết theo từng phòng ban:
-     * - Số lượng ý tưởng
-     * - Số lượng likes
-     * - Số lượng dislikes
-     * - Số lượng bình luận
-     *
-     * @return \Illuminate\Support\Collection
+     * Get statistics by department:
+     * - Number of ideas
+     * - Number of likes
+     * - Number of dislikes
+     * - Number of comments
      */
-    public function getDepartmentStats();
+    public function getDepartmentStatistics();
 }

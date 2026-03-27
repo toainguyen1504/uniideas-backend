@@ -32,9 +32,8 @@ class StatisticsController extends Controller
     {
         $stats = $this->statisticsService->getOverview();
 
-        return $this->okResponse(
+        return $this->okResponse([
             new StatisticsResource($stats),
-            'Statistics list retrieved successfully.'
-        );
+        ], 'Statistics list retrieved successfully.');
     }
 }

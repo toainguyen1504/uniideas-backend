@@ -31,6 +31,4 @@ class DepartmentRepository extends BaseRepository implements DepartmentRepositor
     {
         return $this->model->find($departmentId)?->users;
     }
-
-    
 }

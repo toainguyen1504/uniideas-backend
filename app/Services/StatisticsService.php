@@ -24,10 +24,10 @@ class StatisticsService
     {
         return [
             'total_ideas'    => $this->IdeaRepository->countIdeas(),
-            'total_likes'    => $this->ReactRepository->countReacts(ReactEnum::LIKE->value),
-            'total_dislikes' => $this->ReactRepository->countReacts(ReactEnum::DISLIKE->value),
+            'total_likes'    => $this->ReactRepository->countLikesReact(),
+            'total_dislikes' => $this->ReactRepository->countDislikesReact(),
             'total_comments' => $this->CommentRepository->countComments(),
-            'by_department'  => $this->statisticsRepository->getDepartmentStats(),
+            'by_department'  => $this->statisticsRepository->getDepartmentStatistics(),
         ];
     }
 }

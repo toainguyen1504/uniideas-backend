@@ -47,10 +47,10 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
 
 
     /**
-     * Lấy tổng số bình luận trong hệ thống.
+     * Get total count of comments the system.
      */
-        public function countComments(): int
+    public function countComments(): int
     {
-        return DB::table('comments')->count();
+        return $this->model->count();
     }
 }

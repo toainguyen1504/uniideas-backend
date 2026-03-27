@@ -2,6 +2,7 @@
 
 namespace App\Repositories\React;
 
+use App\Enum\AnonymousEnum;
 use App\Enum\ReactEnum;
 use App\Models\React;
 use App\Repositories\BaseRepository;
@@ -137,11 +138,50 @@ class ReactRepository extends BaseRepository implements ReactRepositoryInterface
     }
     
     /**
-     * Lấy tổng số phản ứng theo loại (LIKE, DISLIKE).
-     *
+     * Get count all Likes of the system.
      */
-    public function countReacts(int $reactType): int
+    public function countLikesReact(): int
     {
-        return React::where('react', $reactType)->count();
+        return $this->model->where('react', ReactEnum::LIKE)->count();
+    }
+
+    /**
+    * Get count all Dislikes of the system.
+    */
+    public function countDislikesReact(): int
+    {
+        return $this->model->where('react', ReactEnum::DISLIKE)->count();
+    }
+
+   /**
+    * Find a user's react for a specific idea, if it exists.
+    */
+    public function findUserReact($userId, $ideaId)
+    {
+        return $this->model->where('user_id', $userId)
+            ->where('idea_id', $ideaId)
+            ->first();
+    }
+
+   /**
+    * Handle deletion of a react, adjusting idea's total_likes if necessary.
+    */
+    public function delete($reactModel)
+    {
+        return $reactModel->delete();
+    }
+
+   /**
+    * Create or update a react for a user and idea. If the react already exists, it will be updated with the new value; otherwise, a new react will be created.
+    */
+    public function updateOrCreate($userId, $ideaId, $value, $isAnonymous)
+    {
+        return $this->model->updateOrCreate(
+            ['user_id' => $userId, 'idea_id' => $ideaId],
+            [
+                'react'        => $value,
+                'is_anonymous' => $isAnonymous ?? AnonymousEnum::NOT_ANONYMOUS->value
+            ]
+        );
     }
 }
