@@ -47,7 +47,13 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
      */
     private function applyFilters(array $searchParams)
     {
-        $query = $this->model->newQuery()->with(['user', 'category', 'submission']);
+        $query = $this->model->newQuery()->with([
+            'user',
+            'category',
+            'submission',
+            'reacts',
+            'comments'
+        ]);
 
         if ($keyword = Arr::get($searchParams, 'search')) {
             $query->where(

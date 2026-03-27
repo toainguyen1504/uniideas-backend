@@ -28,8 +28,10 @@ class IdeaPermissionSeeder extends Seeder
 
         $qaManagerRole = Role::findByName(Acl::ROLE_QA_MANAGER, 'web');
         $staffRole = Role::findByName(Acl::ROLE_STAFF, 'web');
+        $qaCoordinatorRole = Role::findByName(Acl::ROLE_QA_COORDINATOR, 'web');
 
         $qaManagerRole->givePermissionTo($permissions);
         $staffRole->givePermissionTo($permissions);
+        $qaCoordinatorRole->givePermissionTo($permissions);
     }
 }

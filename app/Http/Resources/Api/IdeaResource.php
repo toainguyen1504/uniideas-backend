@@ -48,6 +48,8 @@ class IdeaResource extends JsonResource
             'submission'     => SubmissionResource::make($this->whenLoaded('submission', $this->submission)),
             'created_at'     => $this->created_at?->toDateTimeString(),
             'updated_at'     => $this->updated_at?->toDateTimeString(),
+            'reacts' => ReactResource::collection($this->whenLoaded('reacts', $this->reacts)),
+            'comments' => CommentResource::collection($this->whenLoaded('comments', $this->comments)),
         ];
     }
 }
