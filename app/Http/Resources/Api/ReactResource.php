@@ -15,7 +15,9 @@ class ReactResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'user' => $this->whenLoaded('user', UserResource::make($this->user)),
+            // 'user' => $this->whenLoaded('user', UserResource::make($this->user)),
+            'id' => $this->id,
+            'user' => $this->whenLoaded('user', $this->user->only(['id', 'name', 'email'])),
             'idea_id' => $this->idea_id,
             'react' => $this->react,
             'react_name' => $this->react->getName(),

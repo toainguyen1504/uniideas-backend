@@ -26,8 +26,9 @@ class Idea extends Model implements HasMedia
         'user_id',
         'category_id',
         'submission_id',
-        'is_featured',
-        'intro',
+        'is_featured', 
+        'intro', 
+        'total_likes',
         'terms_conditions',
     ];
 
@@ -93,6 +94,16 @@ class Idea extends Model implements HasMedia
     public function reacts(): HasMany
     {
         return $this->hasMany(React::class);
+    }
+
+    /**
+     * Get comments for the idea.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class, 'idea_id');
     }
 
     /**

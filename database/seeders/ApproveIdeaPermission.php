@@ -4,11 +4,11 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Acl\Acl;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use App\Acl\Acl;
 
-class IdeaPermissionSeeder extends Seeder
+class ApproveIdeaPermission extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,22 +16,14 @@ class IdeaPermissionSeeder extends Seeder
     public function run(): void
     {
         $permissions = [
-            Acl::PERMISSION_IDEA_LIST,
-            Acl::PERMISSION_IDEA_ADD,
-            Acl::PERMISSION_IDEA_EDIT,
-            Acl::PERMISSION_IDEA_DELETE,
+            Acl::PERMISSION_IDEA_APPROVE,
         ];
 
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
 
-        $qaManagerRole = Role::findByName(Acl::ROLE_QA_MANAGER, 'web');
-        $staffRole = Role::findByName(Acl::ROLE_STAFF, 'web');
         $qaCoordinatorRole = Role::findByName(Acl::ROLE_QA_COORDINATOR, 'web');
-
-        $qaManagerRole->givePermissionTo($permissions);
-        $staffRole->givePermissionTo($permissions);
         $qaCoordinatorRole->givePermissionTo($permissions);
     }
 }

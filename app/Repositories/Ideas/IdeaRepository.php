@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Ideas;
 
+use App\Enum\ReactEnum;
 use App\Models\Idea;
 use App\Models\Submission;
 use App\Repositories\BaseRepository;
@@ -46,7 +47,13 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
      */
     private function applyFilters(array $searchParams)
     {
-        $query = $this->model->newQuery()->with(['user', 'category', 'submission']);
+        $query = $this->model->newQuery()->with([
+            'user',
+            'category',
+            'submission',
+            'reacts',
+            'comments'
+        ]);
 
         if ($keyword = Arr::get($searchParams, 'search')) {
             $query->where(
@@ -124,6 +131,45 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
     public function getIdeaById($ideaId)
     {
         return $this->model->findOrFail($ideaId);
+    }
+
+    /**
+     * Get top 3 ideas have is_featured = true in a submission and have most court likes.
+     */
+    public function getTopFeaturedIdeas($submissionId, int $limit = 3)
+    {
+        $query = $this->model->where('submission_id', $submissionId)
+            ->with(['media'])
+            ->withCount([
+                'reacts as total_likes' => function ($q) {
+                    $q->where('react', ReactEnum::LIKE->value);
+                },
+                'comments as comments_count'
+            ])
+            ->orderByDesc('total_likes')
+            ->orderByDesc('created_at')
+            ->orderByDesc('total_views')
+            ->limit($limit);
+
+        $topIdeas = $query->get();
+
+        $topIds = $topIdeas->pluck('id')->toArray();
+
+        DB::transaction(function () use ($submissionId, $topIds) {
+            $this->model->where('submission_id', $submissionId)
+                ->update(['is_featured' => false]);
+
+            if (!empty($topIds)) {
+                $this->model->whereIn('id', $topIds)
+                    ->update(['is_featured' => true]);
+            }
+        });
+
+        foreach ($topIdeas as $idea) {
+            $idea->is_featured = in_array($idea->id, $topIds, true);
+        }
+
+        return $topIdeas;
     }
 
     

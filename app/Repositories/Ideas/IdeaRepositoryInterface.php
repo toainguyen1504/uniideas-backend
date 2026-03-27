@@ -34,4 +34,8 @@ interface IdeaRepositoryInterface extends RepositoryInterface
      */
     public function getIdeaById($ideaId);
 
+    /**
+     * Get top 3 ideas have is_featured = true in a submission and have most court likes.
+     */
+    public function getTopFeaturedIdeas($submissionId, int $limit = 3);
 }

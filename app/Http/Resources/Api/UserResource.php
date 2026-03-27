@@ -16,6 +16,20 @@ class UserResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $permissions = (function () {
+            $names = $this->getPermissionNames()->toArray();
+            if (!empty($names)) {
+                return $names;
+            }
+
+            $this->loadMissing('roles.permissions');
+            return $this->roles
+                ->flatMap(fn($r) => $r->permissions->pluck('name'))
+                ->unique()
+                ->values()
+                ->toArray();
+        })();
+
         return [
             'id' => $this->id,
             'name' => $this->name,
@@ -26,8 +40,9 @@ class UserResource extends JsonResource
             'status' => $this->status ?? 'N/A',
             'status_name' => __(Str::title($this->status->name)),
             'badge_name' => UserStatus::getBadge($this->status->value),
-            'roles' => RoleResource::collection($this->whenLoaded('roles', $this->roles)),
-            'department' => DepartmentResource::make($this->whenLoaded('department', $this->department)),
+            'role' => $this->roles->pluck('name')->implode(', '),
+            'permissions' => $permissions,
+            'department' => DepartmentResource::make($this->whenLoaded('department')),
             'email_verified' => $this->email_verified_at !== null,
             // 'avatar_url' => $this->avatar_url,
         ];
