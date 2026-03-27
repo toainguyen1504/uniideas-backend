@@ -44,4 +44,13 @@ class CommentRepository extends BaseRepository implements CommentRepositoryInter
     {
         return $this->model->where('idea_id', $ideaId)->count();
     }
+
+
+    /**
+     * Get total count of comments the system.
+     */
+    public function countComments(): int
+    {
+        return $this->model->count();
+    }
 }

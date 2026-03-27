@@ -47,7 +47,13 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
      */
     private function applyFilters(array $searchParams)
     {
-        $query = $this->model->newQuery()->with(['user', 'category', 'submission']);
+        $query = $this->model->newQuery()->with([
+            'user',
+            'category',
+            'submission',
+            'reacts',
+            'comments'
+        ]);
 
         if ($keyword = Arr::get($searchParams, 'search')) {
             $query->where(
@@ -132,8 +138,7 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
      */
     public function getTopFeaturedIdeas($submissionId, int $limit = 3)
     {
-        return $this->model->where('submission_id', $submissionId)
-            ->where('is_featured', true)
+        $query = $this->model->where('submission_id', $submissionId)
             ->with(['media'])
             ->withCount([
                 'reacts as total_likes' => function ($q) {
@@ -144,7 +149,35 @@ class IdeaRepository extends BaseRepository implements IdeaRepositoryInterface
             ->orderByDesc('total_likes')
             ->orderByDesc('created_at')
             ->orderByDesc('total_views')
-            ->limit($limit)
-            ->get();
+            ->limit($limit);
+
+        $topIdeas = $query->get();
+
+        $topIds = $topIdeas->pluck('id')->toArray();
+
+        DB::transaction(function () use ($submissionId, $topIds) {
+            $this->model->where('submission_id', $submissionId)
+                ->update(['is_featured' => false]);
+
+            if (!empty($topIds)) {
+                $this->model->whereIn('id', $topIds)
+                    ->update(['is_featured' => true]);
+            }
+        });
+
+        foreach ($topIdeas as $idea) {
+            $idea->is_featured = in_array($idea->id, $topIds, true);
+        }
+
+        return $topIdeas;
+    }
+
+    
+    /**
+     * Count total ideas in the system.
+     */
+    public function countIdeas(): int
+    {
+        return $this->model->count();
     }
 }

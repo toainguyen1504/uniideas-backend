@@ -20,4 +20,9 @@ interface CommentRepositoryInterface extends RepositoryInterface
      * Count 'comments' for a given idea.
      */
     public function countCommentsByIdea(int $ideaId): int;
+
+    /**
+     * Get total count of comments the system.
+     */
+    public function countComments(): int;
 }

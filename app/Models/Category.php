@@ -30,4 +30,5 @@ class Category extends Model
     {
         return $query->where('status', CategoryStatus::INACTIVE);
     }
+    
 }

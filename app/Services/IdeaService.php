@@ -186,34 +186,42 @@ class IdeaService
         return $this->ideaRepository->getTopFeaturedIdeas($submissionId, $limit);
     }
 
+    /**
+     * Get ideas by filter (popular, viewed, latest)
+     */
     public function getIdeasByFilter(IdeaFilter $filter, ?int $perPage = null)
     {
         $query = Idea::withCount([
-            'reacts as likes_count' => fn($q) => $q->where('react', ReactEnum::LIKE),
-            'reacts as dislikes_count' => fn($q) => $q->where('react', ReactEnum::DISLIKE),
+            'reacts as likes_count' => fn($q) => $q->where('react', ReactEnum::LIKE->value),
+            'reacts as dislikes_count' => fn($q) => $q->where('react', ReactEnum::DISLIKE->value),
             'comments as comments_count'
         ])->where('status', IdeaStatus::APPROVED->value);
 
-        switch ($filter) {
-            case IdeaFilter::POPULAR:
-                $query->orderByRaw('likes_count - dislikes_count DESC')
-                    ->orderByDesc('views')
+        $scoreSql = "(
+            (SELECT COUNT(*) FROM reacts WHERE reacts.idea_id = ideas.id AND reacts.react = '".ReactEnum::LIKE->value."') - 
+            (SELECT COUNT(*) FROM reacts WHERE reacts.idea_id = ideas.id AND reacts.react = '".ReactEnum::DISLIKE->value."')
+        )";
+
+        switch ($filter->value) {
+            case IdeaFilter::POPULAR->value:
+                $query->orderByRaw("{$scoreSql} DESC")
+                    ->orderByDesc('total_views')
                     ->orderByDesc('created_at');
                 break;
 
-            case IdeaFilter::VIEWED:
-                $query->orderByDesc('views')
-                    ->orderByRaw('likes_count - dislikes_count DESC')
+            case IdeaFilter::VIEWED->value:
+                $query->orderByDesc('total_views')
+                    ->orderByRaw("{$scoreSql} DESC")
                     ->orderByDesc('created_at');
                 break;
 
-            case IdeaFilter::LATEST:
+            case IdeaFilter::LATEST->value:
             default:
                 $query->orderByDesc('created_at');
                 break;
         }
 
-      return $query->paginate($perPage ?? 5);
+        return $query->paginate($perPage ?? 5);
     }
 
     /**

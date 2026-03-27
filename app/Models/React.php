@@ -27,6 +27,7 @@ class React extends Model
         'idea_id',
         'created_at', 
         'updated_at',
+        'is_anonymous',
     ];
 
     /**
@@ -37,6 +38,7 @@ class React extends Model
     protected $casts = [
         'react' => ReactEnum::class,
         'status' => ActiveStatus::class,
+        'is_anonymous' => \App\Enum\AnonymousEnum::class,
     ];
 
     /**

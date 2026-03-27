@@ -10,6 +10,7 @@ use App\Services\ExportService;
 use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Acl\Acl;
 
 class ExportController extends Controller
 {
@@ -18,7 +19,7 @@ class ExportController extends Controller
     public function __construct(
         protected ExportService $exportService,
     ) {
-        //
+        $this->middleware('permission:' . Acl::PERMISSION_EXPORT_IDEAS)->only('exportIdeasBySubmission');
     }
 
     /**
