@@ -72,7 +72,7 @@ class IdeaController extends Controller
 
         return $this->okResponse(
             [
-                'data' => IdeaResource::collection($ideas),
+                'idea' => IdeaResource::collection($ideas),
                 'pagination' => [
                     'current_page' => $ideas->currentPage(),
                     'last_page' => $ideas->lastPage(),
