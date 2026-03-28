@@ -148,14 +148,25 @@ class ReactController extends Controller
     public function toggleReact(ToggleReactRequest $request, $ideaId)
     {
         $result = $this->reactService->handleToggle(
-            auth()->id(), 
-            $ideaId, 
+            auth()->id(),
+            $ideaId,
             $request->react,
             $request->is_anonymous
         );
 
+        $reactModel = $this->reactRepository->findUserReact(auth()->id(), $ideaId);
+
+        if ($reactModel) {
+            $reactModel->user_react = $result['react_user'] ?? null;
+
+            return $this->okResponse([
+                'react' => ReactResource::make($reactModel)
+            ], $result['message']);
+        }
+
         return $this->okResponse([
-            'react' => ReactResource::make($this->reactRepository->findUserReact(auth()->id(), $ideaId))
+            'react' => null,
+            'react_user' => $result['react_user'] ?? null,
         ], $result['message']);
     }
 }

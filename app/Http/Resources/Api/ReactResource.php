@@ -17,17 +17,17 @@ class ReactResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            // 'user' => $this->whenLoaded('user', UserResource::make($this->user)),
             'id' => $this->id,
-            'user' => $this->whenLoaded('user', $this->user->only(['id', 'name', 'email'])),
-            'idea_id' => $this->idea_id,
-            'react' => $this->react,
-            'react_name' => $this->react->getName(),
+            'idea' => $this->idea_id,
+            'user_react' => $this->user_react,
+            'action' => $this->react,
+            'action_name' => $this->react->getName(),
             'is_anonymous' => $this->is_anonymous instanceof AnonymousEnum
                 ? $this->is_anonymous->value
                 : AnonymousEnum::NOT_ANONYMOUS->value,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'user' => $this->whenLoaded('user', $this->user->only(['id', 'name', 'email'])),
         ];
     }
 }
