@@ -29,6 +29,7 @@ class SubmissionResource extends JsonResource
                 ? $this->final_closure_date->setTimezone('Asia/Ho_Chi_Minh')->format('H:i | d/m/Y')
                 : null,
             'status' => $this->status->value,
+            'status_name' => $this->status->getName(),
             'is_closed'       => $this->is_closed,
             'is_final_closed' => $this->is_final_closed,
             'created_at' => $this->created_at
