@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Enum\IdeaStatus;
 use App\Enum\AnonymousEnum;
+use App\Enum\ReactEnum;
 use App\Repositories\React\ReactRepository;
 use App\Repositories\React\ReactRepositoryInterface;
 use Illuminate\Support\Str;
@@ -19,8 +20,23 @@ class IdeaResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $likes = app(ReactRepositoryInterface::class)->countLikesByIdea($this->id);
-        $dislikes = app(ReactRepositoryInterface::class)->countDislikesByIdea($this->id);
+        $reactRepo = app(ReactRepositoryInterface::class);
+
+        $likes = $reactRepo->countLikesByIdea($this->id);
+        $dislikes = $reactRepo->countDislikesByIdea($this->id);
+
+        $userReact = null;
+
+        if (auth()->check()) {
+            $reactModel = $reactRepo->findUserReact(auth()->id(), $this->id);
+
+            if ($reactModel) {
+                $userReact = $reactModel->react instanceof ReactEnum
+                    ? $reactModel->react->value
+                    : $reactModel->react;
+            }
+        }
+
         return [
             'id'             => $this->id,
             'title'          => $this->title,
@@ -39,6 +55,8 @@ class IdeaResource extends JsonResource
             'is_featured' => (bool) $this->is_featured,
             'likes_count'    => $likes,
             'dislikes_count' => $dislikes,
+            'user_react' => $userReact, // This will be null, 1 (like), or 2 (dislike)
+            
             'score'          => $likes - $dislikes,
             'total_views'    => $this->total_views,
             'total_comments' => $this->total_comments,

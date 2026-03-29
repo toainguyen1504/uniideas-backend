@@ -58,7 +58,7 @@ class UserService
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Error creating user: ' . $e->getMessage());
             return null;
@@ -101,7 +101,7 @@ class UserService
             DB::commit();
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Error updating user: ' . $e->getMessage());
             return null;

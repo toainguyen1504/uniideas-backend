@@ -90,7 +90,7 @@ return [
      * ```
      */
     'servers' => [
-        'Live' => 'https://' . parse_url(config('app.url'), PHP_URL_HOST) .'/api',
+        'Live' => 'https://' . parse_url(config('app.url'), PHP_URL_HOST) . '/api',
     ],
 
     /**
@@ -106,7 +106,7 @@ return [
 
     'middleware' => [
         'web',
-        RestrictedDocsAccess::class,
+        // RestrictedDocsAccess::class, coment để deploy lên hosting Inity Free vì hosting này không hỗ trợ middleware có tham số, nếu dùng middleware này thì sẽ bị lỗi 500 khi truy cập vào docs
     ],
 
     'extensions' => [],

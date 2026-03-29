@@ -85,19 +85,19 @@ class IdeaService
                 return $user->id === auth()->id();
             });
 
-            if ($qaCoordinators->isNotEmpty()) {
-                Notification::send(
-                    $qaCoordinators,
-                    new NewIdeaNotification(auth()->user(), $idea)
-                );
-            }
+            // if ($qaCoordinators->isNotEmpty()) {
+            //     Notification::send(
+            //         $qaCoordinators, 
+            //         new NewIdeaNotification(auth()->user(), $idea)
+            //     );
+            // }
 
-            NotifyIdeaModeratorsJob::dispatch($idea);
+            // NotifyIdeaModeratorsJob::dispatch($idea);
 
             DB::commit();
 
             return $idea;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Create Idea Failed: ' . $e->getMessage());
             return null;
@@ -166,7 +166,7 @@ class IdeaService
 
             DB::commit();
             return $model;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
             return null;
