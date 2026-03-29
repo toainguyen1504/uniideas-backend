@@ -249,7 +249,7 @@ class IdeaService
 
             if ($model->status !== IdeaStatus::PENDING) {
                 DB::rollBack();
-                return ['success' => false, 'message' => 'Only ideas with status "Pending" can be approved.'];
+                return ['success' => false, 'message' => 'Only ideas with status Pending can be approved.'];
             }
 
             $qaCoordinatorUser = auth()->user();

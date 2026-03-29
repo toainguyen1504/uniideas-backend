@@ -117,6 +117,12 @@ class UserService
                 $data['name'] = $data['last_name'] . ' ' . $data['first_name'];
             }
 
+            if (empty($data['password'])) {
+                unset($data['password']);
+            } else {
+                $data['password'] = Hash::make($data['password']);
+            }
+
             $user->update($data);
 
             DB::commit();
