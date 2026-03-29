@@ -16,6 +16,7 @@ use App\Jobs\NotifyIdeaModeratorsJob;
 use App\Models\Idea;
 use App\Models\Submission;
 use App\Notifications\NewIdeaNotification;
+use App\Notifications\UpdateIdeaNotification;
 use App\Repositories\Ideas\IdeaRepositoryInterface;
 use App\Repositories\Submission\SubmissionRepositoryInterface;
 use Illuminate\Support\Facades\Notification;
@@ -141,9 +142,7 @@ class IdeaService
                 $data['is_featured'] = (bool) $data['is_featured'];
             }
 
-            if (isset($data['status']) && $data['status'] !== $model->status) {
-                $data['status'] = IdeaStatus::PENDING->value;
-            }
+            $data['status'] = IdeaStatus::PENDING->value;
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
                 $file = $data['file_path'];
@@ -154,7 +153,6 @@ class IdeaService
                 $newFileName = "{$titleSlug}-{$timestamp}.{$extension}";
 
                 $model->clearMediaCollection($model::FILE_PATH_COLLECTION);
-
                 $model->addMedia($file)
                     ->usingFileName($newFileName)
                     ->toMediaCollection($model::FILE_PATH_COLLECTION);
@@ -163,6 +161,23 @@ class IdeaService
             }
 
             $model->update($data);
+
+            $model->load('submission');
+
+            $departmentId = auth()->user()->department_id ?? null;
+            $qaCoordinators = $this->userRepository->getUsersByQACoordinatorRole($departmentId);
+            $qaCoordinators = $qaCoordinators->reject(function ($user) {
+                return $user->id === auth()->id();
+            });
+
+            if ($qaCoordinators->isNotEmpty()) {
+                Notification::send(
+                    $qaCoordinators,
+                    new UpdateIdeaNotification(auth()->user(), $model)
+                );
+            }
+
+            NotifyIdeaModeratorsJob::dispatch($model);
 
             DB::commit();
             return $model;
@@ -232,6 +247,23 @@ class IdeaService
         try {
             DB::beginTransaction();
 
+            if ($model->status !== IdeaStatus::PENDING) {
+                DB::rollBack();
+                return ['success' => false, 'message' => 'Only ideas with status "Pending" can be approved.'];
+            }
+
+            $qaCoordinatorUser = auth()->user();
+
+            if ($qaCoordinatorUser && $qaCoordinatorUser->hasRole(Acl::ROLE_QA_COORDINATOR)) {
+                $ideaOwnerDepartment = $model->user->department_id ?? null;
+                $userDepartment = $qaCoordinatorUser->department_id ?? null;
+
+                if ($ideaOwnerDepartment !== $userDepartment) {
+                    DB::rollBack();
+                    return ['success' => false, 'message' => 'You are only allowed to approve ideas from your own department.'];
+                }
+            }
+
             $model->update($data);
 
             DB::commit();
@@ -239,7 +271,7 @@ class IdeaService
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Approve Idea Failed: ' . $e->getMessage());
-            return null;
+            return ['success' => false, 'message' => 'Failed to approve idea.'];
         }
     }
 }

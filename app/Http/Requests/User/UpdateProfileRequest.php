@@ -1,20 +1,18 @@
 <?php
 
-namespace App\Http\Requests\Department;
+namespace App\Http\Requests\User;
 
-use App\Acl\Acl;
-use App\Enum\ActiveStatus;
+use App\Rules\ValidPhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
 
-class StoreDepartmentRequest extends FormRequest
+class UpdateProfileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return checkPermission(Acl::PERMISSION_DEPARTMENT_ADD);
+        return true;
     }
 
     /**
@@ -25,15 +23,20 @@ class StoreDepartmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => [
-                'required',
-                'string',
-                'unique:departments,name',
+            'first_name' => [
+                'required', 
+                'string', 
+                'max:30'
             ],
-            'status' => [
+            'last_name' => [
+                'required', 
+                'string', 
+                'max:30'
+            ],
+            'phone_number' => [
                 'required',
-                new Enum(ActiveStatus::class)
-            ]
+                new ValidPhoneNumber(),
+            ],
         ];
     }
 }

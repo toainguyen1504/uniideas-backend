@@ -28,8 +28,6 @@ class UpdateDepartmentRequest extends FormRequest
             'name' => [
                 'required',
                 'string',
-                'max:100',
-                'unique:departments,name',
             ],
             'status' => [
                 'required',

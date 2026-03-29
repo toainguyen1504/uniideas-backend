@@ -29,6 +29,7 @@ class StoreIdeaRequest extends FormRequest
             ],
             'file_path' => [
                 'nullable',
+                'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png',
                 'max:10240',
             ],
             'is_anonymous' => [
@@ -53,6 +54,14 @@ class StoreIdeaRequest extends FormRequest
                 'required',
                 'boolean',
             ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'file_path.mimes' => 'The file must be a file of type: pdf, doc, docx, xls, xlsx, jpg, jpeg, png.',
+            'file_path.max' => 'The file may not be greater than 10MB.',
         ];
     }
 }

@@ -107,4 +107,25 @@ class UserService
             return null;
         }
     }
+
+    public function updateProfileBySelf(User $user, array $data)
+    {
+        try {
+            DB::beginTransaction();
+
+            if (isset($data['last_name']) && isset($data['first_name'])) {
+                $data['name'] = $data['last_name'] . ' ' . $data['first_name'];
+            }
+
+            $user->update($data);
+
+            DB::commit();
+
+            return $user;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating user profile: ' . $e->getMessage());
+            return null;
+        }
+    }
 }

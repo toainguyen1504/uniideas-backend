@@ -181,18 +181,12 @@ class IdeaController extends Controller
         $updated = $this->ideaService->update($idea, $request->validated());
 
         if (!$updated) {
-            return $this->okResponse(
-                null,
-                'Submission is read-only. Cannot update idea.',
-                422
-            );
+            return $this->okResponse([], 'Submission is read-only. Cannot update idea.', 422);
         }
 
-        return $this->okResponse(
-            [
+        return $this->okResponse([
                 'data' => new IdeaResource($updated),
-            ],
-            'Idea updated successfully.'
+            ], 'Idea updated successfully.'
         );
     }
 
@@ -293,12 +287,9 @@ class IdeaController extends Controller
     {
         $approved = $this->ideaService->approve($idea, $request->validated());
 
-        if (!$approved) {
-            return $this->errorResponse(
-                null,
-                'Only ideas with status "Pending" can be approved.',
-                422
-            );
+        if (empty($approved) || ($approved['success'] ?? false) === false) {
+            $message = $approved['message'] ?? 'Unable to approve idea.';
+            return $this->errorResponse(null, $message, 422);
         }
 
         return $this->okResponse(
