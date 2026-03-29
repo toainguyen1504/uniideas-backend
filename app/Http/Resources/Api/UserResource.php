@@ -39,12 +39,11 @@ class UserResource extends JsonResource
             'email' => $this->email ?? 'N/A',
             'status' => $this->status ?? 'N/A',
             'status_name' => __(Str::title($this->status->name)),
-            'badge_name' => UserStatus::getBadge($this->status->value),
+            'role_id' => $this->roles->pluck('id')->first(),
             'role' => $this->roles->pluck('name')->implode(', '),
             'permissions' => $permissions,
-            'department' => DepartmentResource::make($this->whenLoaded('department')),
+            'department' => DepartmentResource::make($this->whenLoaded('department') ?? null),
             'email_verified' => $this->email_verified_at !== null,
-            // 'avatar_url' => $this->avatar_url,
         ];
     }
 }
