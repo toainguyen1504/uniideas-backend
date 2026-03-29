@@ -12,14 +12,6 @@ enum UserStatus: int
     case ACTIVE = 1;
     case DISABLED = 2;
 
-    public static function getBadge( $statusValue){
-        return match($statusValue) {
-            self::ACTIVE->value => 'success',
-            self::DISABLED->value => 'danger',
-            default => '',
-        };
-    }
-
     public function getName(): string
     {
         return match ($this) {

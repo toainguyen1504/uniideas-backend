@@ -7,6 +7,7 @@ use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
 use App\Acl\Acl;
 use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\User\UpdateProfileRequest;
 use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\Api\UserResource;
 use App\Models\User;
@@ -144,5 +145,33 @@ class UserController extends Controller
         return $deleted
             ? $this->okResponse([], 'User deleted successfully.')
             : $this->errorResponse([], 'Failed to delete user.', 422);
+    }
+
+    /**
+     * Update profile.
+     * 
+     * Update the authenticated user's profile information, including first name, last name, phone number.
+     * 
+     * @authenticated
+     * 
+     * @response array{
+     *   message: string,
+     *   data: \App\Http\Resources\Api\UserResource,
+     * }
+     * 
+     * @param \App\Http\Requests\User\UpdateProfileRequest $request
+     */
+    public function updateProfile(UpdateProfileRequest $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return $this->errorResponse([], 'User not authenticated.', 401);
+        }
+
+        $updateProfile = $this->userService->updateProfileBySelf($user, $request->validated());
+
+        return $updateProfile
+            ? $this->okResponse(new UserResource($updateProfile), 'Profile updated successfully.')
+            : $this->errorResponse([], 'Failed to update profile.', 422);
     }
 }

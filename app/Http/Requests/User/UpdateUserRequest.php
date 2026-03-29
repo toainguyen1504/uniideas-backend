@@ -5,6 +5,7 @@ namespace App\Http\Requests\User;
 use App\Acl\Acl;
 use App\Enum\GenderEnum;
 use App\Enum\UserStatus;
+use App\Rules\ValidPhoneNumber;
 use Illuminate\Validation\Rules\Enum;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -37,14 +38,13 @@ class UpdateUserRequest extends FormRequest
                 "max:30"
             ],
             "phone_number" => [
-                "required", 
-                "unique:users,phone_number",
+                "required",
+                new ValidPhoneNumber(),
             ],
             "email" => [
                 "required", 
-                "email", 
-                "max:100", 
-                "unique:users,email"
+                "email",
+                "max:100",
             ],
             "birth_date" => [
                 "nullable", 
@@ -60,7 +60,8 @@ class UpdateUserRequest extends FormRequest
                 "min:8"
             ],
             "roles" => [
-                "required"
+                "required",
+                "integer",
             ],
             "status" => [
                 "required", 
