@@ -157,7 +157,7 @@ class ReactController extends Controller
         $reactModel = $this->reactRepository->findUserReact(auth()->id(), $ideaId);
 
         if ($reactModel) {
-            $reactModel->user_react = $result['react_user'] ?? null;
+            // $reactModel->user_react = $result['react_user'] ?? null;
 
             return $this->okResponse([
                 'react' => ReactResource::make($reactModel)

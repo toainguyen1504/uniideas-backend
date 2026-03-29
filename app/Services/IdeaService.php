@@ -67,7 +67,7 @@ class IdeaService
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
                 $file = $data['file_path'];
-                
+
                 $titleSlug = $data['slug'];
                 $timestamp = now()->timestamp;
                 $extension = $file->getClientOriginalExtension();
@@ -76,7 +76,7 @@ class IdeaService
                 $idea->addMedia($file)
                     ->usingFileName($newFileName)
                     ->toMediaCollection(Idea::FILE_PATH_COLLECTION);
-                
+
                 $idea->load('media');
             }
 
@@ -93,12 +93,12 @@ class IdeaService
                 );
             }
 
-            NotifyIdeaModeratorsJob::dispatch($idea);
+            // NotifyIdeaModeratorsJob::dispatch($idea);
 
             DB::commit();
 
             return $idea;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Create Idea Failed: ' . $e->getMessage());
             return null;
@@ -146,7 +146,7 @@ class IdeaService
 
             if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
                 $file = $data['file_path'];
-                
+
                 $titleSlug = $data['slug'] ?? $model->slug;
                 $timestamp = now()->timestamp;
                 $extension = $file->getClientOriginalExtension();
@@ -181,7 +181,7 @@ class IdeaService
 
             DB::commit();
             return $model;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Update Idea Failed: ' . $e->getMessage());
             return null;
@@ -213,8 +213,8 @@ class IdeaService
         ])->where('status', IdeaStatus::APPROVED->value);
 
         $scoreSql = "(
-            (SELECT COUNT(*) FROM reacts WHERE reacts.idea_id = ideas.id AND reacts.react = '".ReactEnum::LIKE->value."') - 
-            (SELECT COUNT(*) FROM reacts WHERE reacts.idea_id = ideas.id AND reacts.react = '".ReactEnum::DISLIKE->value."')
+            (SELECT COUNT(*) FROM reacts WHERE reacts.idea_id = ideas.id AND reacts.react = '" . ReactEnum::LIKE->value . "') - 
+            (SELECT COUNT(*) FROM reacts WHERE reacts.idea_id = ideas.id AND reacts.react = '" . ReactEnum::DISLIKE->value . "')
         )";
 
         switch ($filter->value) {

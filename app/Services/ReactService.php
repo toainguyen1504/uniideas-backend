@@ -18,19 +18,28 @@ class ReactService
         $current = $this->reactRepository->findUserReact($userId, $ideaId);
 
         $previous = null;
+        $currentValue = null;
+
+
         if ($current) {
             $previous = $current->react instanceof \App\Enum\ReactEnum
                 ? $current->react->value
                 : $current->react;
         }
 
-        if ($current && ($current->react instanceof \App\Enum\ReactEnum
-            ? $current->react->value === $newValue
-            : $current->react === $newValue)) {
+        if ($current) {
+            $currentValue = $current->react instanceof \App\Enum\ReactEnum
+                ? $current->react->value
+                : $current->react;
+        }
+
+        // FIX CHUẨN
+        if ($current && ($newValue === null || $currentValue === $newValue)) {
             $this->reactRepository->delete($current);
+
             return [
-                'status' => 'none',
-                'react_user' => $previous,
+                'status' => null,
+                'react_user' => null,
                 'message' => 'React removed'
             ];
         }
@@ -39,7 +48,7 @@ class ReactService
 
         return [
             'status' => $newValue,
-            'react_user' => $previous,
+            'react_user' => $newValue,
             'is_anonymous' => $isAnonymous,
             'message' => __('Successfully reacted')
         ];
