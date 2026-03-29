@@ -4,6 +4,8 @@ namespace App\Http\Requests\User;
 
 use App\Rules\ValidPhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Enum\GenderEnum;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateProfileRequest extends FormRequest
 {
@@ -24,18 +26,31 @@ class UpdateProfileRequest extends FormRequest
     {
         return [
             'first_name' => [
-                'required', 
+                'nullable', 
                 'string', 
                 'max:30'
             ],
             'last_name' => [
-                'required', 
+                'nullable', 
                 'string', 
                 'max:30'
             ],
             'phone_number' => [
-                'required',
+                'nullable',
                 new ValidPhoneNumber(),
+            ],
+            'birth_date' => [
+                "nullable", 
+                "date"
+            ],
+            'gender' => [
+                "nullable", 
+                new Enum(GenderEnum::class)
+            ],
+            'password' => [
+                "nullable", 
+                "string", 
+                "min:8"
             ],
         ];
     }
