@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Comment;
 
+use App\Enum\AnonymousEnum;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreCommentRequest extends FormRequest
 {
@@ -31,6 +33,11 @@ class StoreCommentRequest extends FormRequest
                 'required',
                 'string',
                 'max:1000',
+            ],
+            'is_anonymous' => [
+                'nullable',
+                'integer',
+                new Enum(AnonymousEnum::class),
             ],
         ];
     }
