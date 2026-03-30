@@ -286,15 +286,16 @@ class IdeaController extends Controller
     public function approve(ApprovedIdeaRequest $request, Idea $idea)
     {
         $approved = $this->ideaService->approve($idea, $request->validated());
-
-        if (empty($approved) || ($approved['success'] ?? false) === false) {
+        if (is_array($approved)) {
             $message = $approved['message'] ?? 'Unable to approve idea.';
-            return $this->errorResponse(null, $message, 422);
+            $status = str_contains($message, 'own department') ? 403 : 422;
+            return $this->errorResponse(null, $message, $status);
         }
 
-        return $this->okResponse(
-            new IdeaResource($approved),
-            'Idea approved successfully.'
-        );
+        if (!$approved instanceof Idea) {
+            return $this->errorResponse(null, 'Unable to approve idea.', 422);
+        }
+
+        return $this->okResponse(new IdeaResource($approved), 'Idea status successfully changed.');
     }
 }

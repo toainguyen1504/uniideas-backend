@@ -25,6 +25,7 @@ class ReactResource extends JsonResource
             'is_anonymous' => $this->is_anonymous instanceof AnonymousEnum
                 ? $this->is_anonymous->value
                 : AnonymousEnum::NOT_ANONYMOUS->value,
+            'is_anonymous_name' => __(Str::title(str_replace('_', ' ', $this->is_anonymous->name))),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'user' => $this->whenLoaded('user', $this->user->only(['id', 'name', 'email'])),
