@@ -296,6 +296,6 @@ class IdeaController extends Controller
             return $this->errorResponse(null, 'Unable to approve idea.', 422);
         }
 
-        return $this->okResponse(new IdeaResource($approved), 'Idea approved successfully.');
+        return $this->okResponse(new IdeaResource($approved), 'Idea status successfully changed.');
     }
 }
