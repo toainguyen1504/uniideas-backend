@@ -1,4 +1,4 @@
-name: Deploy Backend to InterData Hosting 22-03-2026 - integrate export file excel
+name: Deploy Backend to InterData Hosting 30-03-2026 - fixbug and update profile
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ jobs:
           server: ftp.uniideas.io.vn
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
+          protocol: ftps
           port: 21
           local-dir: ./   # hoặc thư mục chứa backend, ví dụ backend/
           server-dir: /public_html/api.uniideas.io.vn/
