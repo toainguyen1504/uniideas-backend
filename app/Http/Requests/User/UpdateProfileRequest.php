@@ -50,7 +50,8 @@ class UpdateProfileRequest extends FormRequest
             'password' => [
                 "nullable", 
                 "string", 
-                "min:8"
+                "min:8",
+                "confirmed"
             ],
         ];
     }

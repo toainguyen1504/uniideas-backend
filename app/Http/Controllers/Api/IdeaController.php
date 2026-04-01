@@ -105,14 +105,6 @@ class IdeaController extends Controller
     {
         $idea = $this->ideaService->create($request->validated());
 
-        if (!$idea) {
-            return $this->errorResponse(
-                null,
-                'Ideas cannot be submitted after Closure Date.',
-                422
-            );
-        }
-
         return $this->okResponse(
             new IdeaResource($idea),
             'Idea created successfully.'
@@ -178,6 +170,11 @@ class IdeaController extends Controller
      */
     public function update(UpdateIdeaRequest $request, Idea $idea)
     {
+        $user = auth()->user();
+        if ($idea->user_id !== $user->id) {
+            return $this->errorResponse([], 'You are not the owner of this idea.', 403);
+        }
+
         $updated = $this->ideaService->update($idea, $request->validated());
 
         if (!$updated) {
@@ -206,6 +203,11 @@ class IdeaController extends Controller
      */
     public function destroy(Idea $idea)
     {
+        $user = auth()->user();
+        if ($idea->user_id !== $user->id) {
+            return $this->errorResponse([], 'You are not the owner of this idea.', 403);
+        }
+
         $deleted = $this->ideaRepository->destroy($idea);
 
         return $deleted
