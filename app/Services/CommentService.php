@@ -55,7 +55,7 @@ class CommentService
 
             if ($ideaOwner && $ideaOwner->id !== auth()->id()) {
                 $ideaOwner->notify(new NewCommentIdeaNotification(auth()->user(), $comment, $comment->idea));
-                NotifyCommentIdeaJob::dispatch($comment, $comment->idea);
+                // NotifyCommentIdeaJob::dispatch($comment, $comment->idea);
             }
 
             DB::commit();

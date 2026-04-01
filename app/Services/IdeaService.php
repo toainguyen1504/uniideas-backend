@@ -177,7 +177,7 @@ class IdeaService
                 );
             }
 
-            NotifyIdeaModeratorsJob::dispatch($model);
+            // NotifyIdeaModeratorsJob::dispatch($model);
 
             DB::commit();
             return $model;

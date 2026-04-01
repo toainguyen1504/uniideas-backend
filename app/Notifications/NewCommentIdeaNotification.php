@@ -36,19 +36,19 @@ class NewCommentIdeaNotification extends Notification
      */
     public function via($notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     /**
      * Get the mail representation of the notification.
      */
-    // public function toMail(object $notifiable): MailMessage
-    // {
-    //     return (new MailMessage)
-    //         ->line('The introduction to the notification.')
-    //         ->action('Notification Action', url('/'))
-    //         ->line('Thank you for using our application!');
-    // }
+    public function toMail($notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('New Comment on Idea')
+            ->line("{$this->user->name} has commented on the idea '{$this->idea->title}'.")
+            ->line("Comment: " . Str::limit($this->comment->content, 100));
+    }
 
     /**
      * Get the array representation of the notification.
@@ -60,7 +60,7 @@ class NewCommentIdeaNotification extends Notification
         return [
             'user_id' => $this->user->id,
             'idea_id' => $this->idea->id,
-            'message' => "{$this->user->name} đã bình luận về ý tưởng '{$this->idea->title}': " . Str::limit($this->comment->content, 50),
+            'message' => "{$this->user->name} has commented on the idea '{$this->idea->title}': " . Str::limit($this->comment->content, 50),
         ];
     }
 }
