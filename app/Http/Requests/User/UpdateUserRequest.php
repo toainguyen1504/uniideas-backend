@@ -50,12 +50,8 @@ class UpdateUserRequest extends FormRequest
                 "nullable", 
                 "date"
             ],
-            "gender" => [
-                "nullable", 
-                new Enum(GenderEnum::class)
-            ],
             "password" => [
-                "required", 
+                "nullable", 
                 "string", 
                 "min:8"
             ],

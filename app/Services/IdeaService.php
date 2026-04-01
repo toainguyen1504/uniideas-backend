@@ -189,6 +189,15 @@ class IdeaService
     }
 
     /**
+     * Remove file path from idea
+     */
+    public function removeFilePath($model)
+    {
+        $model->clearMediaCollection(Idea::FILE_PATH_COLLECTION);
+        return response()->noContent();
+    }
+
+    /**
      * Get top 3 ideas have is_featured = true in a submission and have most court likes.
      */
     public function getTopFeaturedIdeas($submissionId, int $limit = 3)
