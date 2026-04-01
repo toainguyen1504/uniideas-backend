@@ -300,4 +300,30 @@ class IdeaController extends Controller
 
         return $this->okResponse(new IdeaResource($approved), 'Idea status successfully changed.');
     }
+
+    /**
+     * Remove file path.
+     *
+     * Remove file path from idea.
+     * 
+     * @authenticated
+     * 
+     * @response array{
+     *     message: string,
+     *    data: array{},
+     * }
+     * 
+     * @param \App\Models\Idea $idea
+     */
+    public function removeFilePath(Idea $idea)
+    {
+        $user = auth()->user();
+        if ($idea->user_id !== $user->id) {
+            return $this->errorResponse([], 'You are not the owner of this idea.', 403);
+        }
+
+        $filePathRemove = $this->ideaService->removeFilePath($idea);
+
+        return $this->okResponse($filePathRemove, 'File path removed successfully.');
+    }
 }

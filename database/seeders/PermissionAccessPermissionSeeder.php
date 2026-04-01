@@ -8,7 +8,7 @@ use App\Acl\Acl;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
-class ApproveIdeaPermission extends Seeder
+class PermissionAccessPermissionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,16 +16,14 @@ class ApproveIdeaPermission extends Seeder
     public function run(): void
     {
         $permissions = [
-            Acl::PERMISSION_IDEA_APPROVE,
+            Acl::PERMISSION_ROLE_EDIT,
         ];
 
         foreach ($permissions as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
 
-        $qaCoordinatorRole = Role::findByName(Acl::ROLE_QA_COORDINATOR, 'web');
-        $qaManaderRole = Role::findByName(Acl::ROLE_QA_MANAGER, 'web');
-        $qaCoordinatorRole->givePermissionTo($permissions);
-        $qaManaderRole->givePermissionTo($permissions);
+        $adminRole = Role::findByName(Acl::ROLE_ADMIN, 'web');
+        $adminRole->givePermissionTo($permissions);
     }
 }

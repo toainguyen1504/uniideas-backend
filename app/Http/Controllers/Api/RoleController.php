@@ -24,7 +24,7 @@ class RoleController extends Controller
         protected PermissionRepositoryInterface $permissionRepository,
     ) {
         $this->middleware('permission:' . Acl::PERMISSION_ROLE_MANAGE)->only('index');
-        // $this->middleware('permission:' . Acl::PERMISSION_ROLE_EDIT)->only('update');
+        $this->middleware('permission:' . Acl::PERMISSION_ROLE_EDIT)->only('update');
     }
     /**
      * Get role list

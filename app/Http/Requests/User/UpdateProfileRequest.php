@@ -43,10 +43,6 @@ class UpdateProfileRequest extends FormRequest
                 "nullable", 
                 "date"
             ],
-            'gender' => [
-                "nullable", 
-                new Enum(GenderEnum::class)
-            ],
             'password' => [
                 "nullable", 
                 "string", 
