@@ -32,7 +32,7 @@ class NewIdeaNotification extends Notification
      */
     public function via($notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -47,5 +47,18 @@ class NewIdeaNotification extends Notification
             'idea_id' => $this->idea->id,
             'message' => "New idea submitted by {$this->user->name}: {$this->idea->title}",
         ];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail($notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('New Idea Submitted')
+            ->line("A new idea has been submitted by {$this->user->name}.")
+            ->line("Title: {$this->idea->title}")
+            ->action('View Idea', url("/ideas/{$this->idea->id}"))
+            ->line('Thank you for using UniIdeas!');
     }
 }

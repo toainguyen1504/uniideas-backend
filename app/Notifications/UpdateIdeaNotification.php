@@ -32,7 +32,7 @@ class UpdateIdeaNotification extends Notification
      */
     public function via($notifiable): array
     {
-        return ['database'];
+        return ['database', 'mail'];
     }
 
     /**
@@ -47,5 +47,16 @@ class UpdateIdeaNotification extends Notification
             'idea_id' => $this->idea->id,
             'message' => "Updated idea submitted by {$this->user->name}: {$this->idea->title}",
         ];
+    }
+
+    /**
+     * Get the mail representation of the notification.
+     */
+    public function toMail($notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Idea Updated')
+            ->line("An idea has been updated by {$this->user->name}.")
+            ->line("Title: {$this->idea->title}");
     }
 }

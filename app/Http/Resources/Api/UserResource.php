@@ -24,7 +24,7 @@ class UserResource extends JsonResource
 
             $this->loadMissing('roles.permissions');
             return $this->roles
-                ->flatMap(fn($r) => $r->permissions->pluck('name'))
+                ->flatMap(fn($role) => $role->permissions->pluck('name'))
                 ->unique()
                 ->values()
                 ->toArray();
@@ -37,12 +37,14 @@ class UserResource extends JsonResource
             'last_name' => $this->last_name ?? 'N/A',
             'phone_number' => $this->phone_number ?? 'N/A',
             'email' => $this->email ?? 'N/A',
+            'birth_date' => $this->birth_date ?? 'N/A',
+            'birth_date_formatted' => $this->birth_date ? $this->birth_date->format('d-m-Y') : 'N/A',
             'status' => $this->status ?? 'N/A',
             'status_name' => __(Str::title($this->status->name)),
             'role_id' => $this->roles->pluck('id')->first(),
             'role' => $this->roles->pluck('name')->implode(', '),
             'permissions' => $permissions,
-            'department' => DepartmentResource::make($this->whenLoaded('department') ?? null),
+            'department' => DepartmentResource::make($this->whenLoaded('department', $this->department)),
             'email_verified' => $this->email_verified_at !== null,
         ];
     }
