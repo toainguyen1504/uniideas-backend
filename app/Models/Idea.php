@@ -41,6 +41,10 @@ class Idea extends Model implements HasMedia
         'terms_conditions' => 'boolean',
     ];
 
+    protected $appends = [
+        'file_path',
+    ];
+
     protected $with = ['media'];
 
     const FILE_PATH_COLLECTION = 'file_path';
